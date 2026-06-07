@@ -1,0 +1,7 @@
+services:
+  kafka:
+    image: apache/kafka:4.1.2
+    container_name: market_kafka
+    ports:
+      - "9092:9092"
+    restart: unless-stopped
