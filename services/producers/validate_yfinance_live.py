@@ -25,6 +25,30 @@ def clean_value(value):
     return value
 
 
+def normalize_event_ts(value) -> str:
+    if value is None:
+        return now_utc()
+
+    try:
+        value_str = str(value)
+
+        # yfinance WebSocket often sends epoch milliseconds as string/int.
+        if value_str.isdigit():
+            ts = int(value_str)
+
+            # milliseconds
+            if ts > 10_000_000_000:
+                return datetime.fromtimestamp(ts / 1000, tz=timezone.utc).isoformat()
+
+            # seconds
+            return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+
+        return value_str
+
+    except Exception:
+        return now_utc()
+
+
 def normalize_yfinance_message(message: dict) -> dict:
     symbol = (
         message.get("id")
@@ -39,11 +63,10 @@ def normalize_yfinance_message(message: dict) -> dict:
         or message.get("lastPrice")
     )
 
-    event_ts = (
+    raw_event_ts = (
         message.get("time")
         or message.get("timestamp")
         or message.get("ts")
-        or now_utc()
     )
 
     return {
@@ -54,7 +77,7 @@ def normalize_yfinance_message(message: dict) -> dict:
         "source": "yfinance_websocket",
         "dataset": "yahoo_finance",
         "schema": "websocket_tick",
-        "event_ts": str(event_ts),
+        "event_ts": normalize_event_ts(raw_event_ts),
         "ingest_ts": now_utc(),
         "price": clean_value(price),
         "volume": clean_value(message.get("dayVolume") or message.get("volume")),
@@ -67,7 +90,7 @@ def main():
 
     symbols = [
         s.strip()
-        for s in os.getenv("YFINANCE_SYMBOLS", "AAPL,MSFT,NVDA").split(",")
+        for s in os.getenv("YFINANCE_SYMBOLS", "AAPL,MSFT,NVDA,AMZN").split(",")
         if s.strip()
     ]
     max_messages = int(os.getenv("YFINANCE_MAX_MESSAGES", "20"))
@@ -76,6 +99,9 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_path = output_dir / "yfinance_live_events.jsonl"
+
+    # Reset validation file each run.
+    output_path.write_text("", encoding="utf-8")
 
     print("yfinance live validation config:")
     print(json.dumps({"symbols": symbols, "max_messages": max_messages}, indent=2))
@@ -94,6 +120,7 @@ def main():
 
         print(
             f"[{seen['count']}/{max_messages}] "
+            f"{event['event_ts']} "
             f"{event['symbol']} price={event.get('price')} "
             f"volume={event.get('volume')} "
             f"source={event['source']}"
