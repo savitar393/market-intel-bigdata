@@ -95,3 +95,14 @@ CREATE TABLE IF NOT EXISTS alerts_by_symbol (
   source text,
   PRIMARY KEY ((symbol), alert_time, alert_id)
 ) WITH CLUSTERING ORDER BY (alert_time DESC);
+
+CREATE TABLE IF NOT EXISTS telegram_notifications_by_alert (
+  alert_id text,
+  symbol text,
+  alert_time timestamp,
+  sent_at timestamp,
+  chat_id text,
+  status text,
+  response_text text,
+  PRIMARY KEY ((alert_id))
+);

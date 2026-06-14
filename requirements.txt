@@ -9,3 +9,4 @@ cassandra-driver
 fastapi
 uvicorn[standard]
 websockets
+requests
