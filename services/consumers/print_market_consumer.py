@@ -30,10 +30,17 @@ try:
 
         event = json.loads(msg.value().decode("utf-8"))
 
+        price = event.get("price")
+        close = event.get("close")
+        display_price = price if price is not None else close
+
         print(
-            f"[{event['event_ts']}] "
-            f"{event['symbol']} price={event['price']} "
-            f"volume={event['volume']} source={event['source']}"
+            f"[{event.get('event_ts')}] "
+            f"{event.get('symbol')} "
+            f"type={event.get('event_type')} "
+            f"price_or_close={display_price} "
+            f"volume={event.get('volume')} "
+            f"source={event.get('source')}"
         )
 
 except KeyboardInterrupt:
