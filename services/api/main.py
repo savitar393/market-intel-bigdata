@@ -125,7 +125,7 @@ def fetch_news_rows(symbol: str, limit: int = 20) -> list[dict]:
     return [row_to_dict(row) for row in rows]
 
 def fetch_prediction_rows(symbol: str, limit: int = 20) -> list[dict]:
-    safe_limit = max(1, min(limit, 100))
+    safe_limit = max(1, min(int(limit), 100))
     sess = get_session()
 
     rows = sess.execute(
@@ -210,10 +210,11 @@ def latest_predictions(
     symbol: str,
     limit: int = Query(default=20, ge=1, le=100),
 ):
-    items = fetch_prediction_rows(symbol.upper(), limit)
+    normalized_symbol = symbol.upper()
+    items = fetch_prediction_rows(normalized_symbol, int(limit))
 
     return {
-        "symbol": symbol.upper(),
+        "symbol": normalized_symbol,
         "count": len(items),
         "items": items,
     }
