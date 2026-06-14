@@ -2,3 +2,4 @@ confluent-kafka
 python-dotenv
 databento
 pandas
+yfinance
