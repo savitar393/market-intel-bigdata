@@ -22,3 +22,6 @@ derby.log
 
 # Generated ML feature datasets
 data/features/
+
+# Generated ML artifacts
+data/model_artifacts/
