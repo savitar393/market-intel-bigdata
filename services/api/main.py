@@ -151,6 +151,36 @@ def fetch_prediction_rows(symbol: str, limit: int = 20) -> list[dict]:
 
     return [row_to_dict(row) for row in rows]
 
+def fetch_alert_rows(symbol: str, limit: int = 20) -> list[dict]:
+    safe_limit = max(1, min(int(limit), 100))
+    sess = get_session()
+
+    rows = sess.execute(
+        f"""
+        SELECT
+            symbol,
+            alert_time,
+            alert_id,
+            event_time,
+            prediction_time,
+            model_name,
+            alert_type,
+            severity,
+            predicted_direction,
+            probability_down,
+            probability_up,
+            confidence,
+            message,
+            source
+        FROM alerts_by_symbol
+        WHERE symbol = %s
+        LIMIT {safe_limit}
+        """,
+        (symbol,),
+    )
+
+    return [row_to_dict(row) for row in rows]
+
 @app.get("/")
 def root():
     return {
@@ -219,6 +249,20 @@ def latest_predictions(
         "items": items,
     }
 
+@app.get("/api/v1/alerts/latest/{symbol}")
+def latest_alerts(
+    symbol: str,
+    limit: int = Query(default=20, ge=1, le=100),
+):
+    normalized_symbol = symbol.upper()
+    items = fetch_alert_rows(normalized_symbol, int(limit))
+
+    return {
+        "symbol": normalized_symbol,
+        "count": len(items),
+        "items": items,
+    }
+
 @app.get("/api/v1/dashboard/snapshot/{symbol}")
 def dashboard_snapshot(
     symbol: str,
@@ -232,6 +276,7 @@ def dashboard_snapshot(
         "market": fetch_market_rows(normalized_symbol, market_limit),
         "news": fetch_news_rows(normalized_symbol, news_limit),
         "predictions": fetch_prediction_rows(normalized_symbol, 10),
+        "alerts": fetch_alert_rows(normalized_symbol, 10),
         "generated_at": datetime.utcnow().isoformat() + "Z",
     }
 
@@ -306,6 +351,7 @@ async def ws_live(
                 "market": fetch_market_rows(normalized_symbol, 10),
                 "news": fetch_news_rows(normalized_symbol, 5),
                 "predictions": fetch_prediction_rows(normalized_symbol, 10),
+                "alerts": fetch_alert_rows(normalized_symbol, 10),
                 "generated_at": datetime.utcnow().isoformat() + "Z",
             }
 
