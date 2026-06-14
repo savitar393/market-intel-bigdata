@@ -3,3 +3,4 @@ python-dotenv
 databento
 pandas
 yfinance
+finnhub-python
