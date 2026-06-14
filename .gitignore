@@ -12,3 +12,10 @@ data/processed/
 spark-warehouse/
 metastore_db/
 derby.log
+
+# Spark runtime files
+data/checkpoints/
+data/processed/
+spark-warehouse/
+metastore_db/
+derby.log
