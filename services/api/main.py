@@ -124,6 +124,32 @@ def fetch_news_rows(symbol: str, limit: int = 20) -> list[dict]:
 
     return [row_to_dict(row) for row in rows]
 
+def fetch_prediction_rows(symbol: str, limit: int = 20) -> list[dict]:
+    safe_limit = max(1, min(limit, 100))
+    sess = get_session()
+
+    rows = sess.execute(
+        f"""
+        SELECT
+            symbol,
+            event_time,
+            prediction_time,
+            event_id,
+            model_name,
+            market_price,
+            predicted_direction,
+            probability_down,
+            probability_up,
+            target_direction,
+            source
+        FROM model_predictions_by_symbol
+        WHERE symbol = %s
+        LIMIT {safe_limit}
+        """,
+        (symbol,),
+    )
+
+    return [row_to_dict(row) for row in rows]
 
 @app.get("/")
 def root():
@@ -179,6 +205,18 @@ def latest_news(
         "items": items,
     }
 
+@app.get("/api/v1/predictions/latest/{symbol}")
+def latest_predictions(
+    symbol: str,
+    limit: int = Query(default=20, ge=1, le=100),
+):
+    items = fetch_prediction_rows(symbol.upper(), limit)
+
+    return {
+        "symbol": symbol.upper(),
+        "count": len(items),
+        "items": items,
+    }
 
 @app.get("/api/v1/dashboard/snapshot/{symbol}")
 def dashboard_snapshot(
@@ -192,6 +230,7 @@ def dashboard_snapshot(
         "symbol": normalized_symbol,
         "market": fetch_market_rows(normalized_symbol, market_limit),
         "news": fetch_news_rows(normalized_symbol, news_limit),
+        "predictions": fetch_prediction_rows(normalized_symbol, 10),
         "generated_at": datetime.utcnow().isoformat() + "Z",
     }
 
@@ -265,6 +304,7 @@ async def ws_live(
                 "symbol": normalized_symbol,
                 "market": fetch_market_rows(normalized_symbol, 10),
                 "news": fetch_news_rows(normalized_symbol, 5),
+                "predictions": fetch_prediction_rows(normalized_symbol, 10),
                 "generated_at": datetime.utcnow().isoformat() + "Z",
             }
 
