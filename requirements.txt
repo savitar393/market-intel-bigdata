@@ -1,2 +1,6 @@
 confluent-kafka
 python-dotenv
+databento
+pandas
+yfinance
+finnhub-python
