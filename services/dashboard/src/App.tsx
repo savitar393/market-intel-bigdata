@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LineChart,
   Line,
@@ -47,15 +47,43 @@ function App() {
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [lastError, setLastError] = useState<string | null>(null);
+  const requestSeqRef = useRef(0);
 
   useEffect(() => {
+    const requestSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = requestSeq;
+
     let socket: WebSocket | null = null;
     let reconnectTimer: number | null = null;
+    let shouldReconnect = true;
+
+    const selectedSymbol = symbol;
+    const encodedSymbol = encodeURIComponent(selectedSymbol);
+
+    setConnectionStatus("connecting");
+    setLastError(null);
+    setSnapshot(null);
+
+    function isCurrentRequest() {
+      return requestSeqRef.current === requestSeq;
+    }
 
     async function loadInitialSnapshot() {
       try {
-        const response = await fetch(`${API_BASE}/api/v1/dashboard/snapshot/${symbol}`);
+        const response = await fetch(
+          `${API_BASE}/api/v1/dashboard/snapshot/${encodedSymbol}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
         const data = await response.json();
+
+        if (!isCurrentRequest()) {
+          return;
+        }
+
         setSnapshot({
           type: "initial_snapshot",
           symbol: data.symbol,
@@ -64,31 +92,66 @@ function App() {
           generated_at: data.generated_at,
         });
       } catch (error) {
+        if (!isCurrentRequest()) {
+          return;
+        }
+
         setLastError(`REST snapshot failed: ${String(error)}`);
       }
     }
 
     function connectWebSocket() {
+      if (!shouldReconnect || !isCurrentRequest()) {
+        return;
+      }
+
       setConnectionStatus("connecting");
 
-      socket = new WebSocket(`${WS_BASE}/ws/live/${symbol}?interval_seconds=2`);
+      socket = new WebSocket(
+        `${WS_BASE}/ws/live/${encodedSymbol}?interval_seconds=2`
+      );
 
       socket.onopen = () => {
+        if (!isCurrentRequest()) {
+          return;
+        }
+
         setConnectionStatus("connected");
         setLastError(null);
       };
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setSnapshot(data);
+        if (!isCurrentRequest()) {
+          return;
+        }
+
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.symbol !== selectedSymbol) {
+            return;
+          }
+
+          setSnapshot(data);
+        } catch (error) {
+          setLastError(`WebSocket message parse failed: ${String(error)}`);
+        }
       };
 
       socket.onerror = () => {
+        if (!isCurrentRequest()) {
+          return;
+        }
+
         setConnectionStatus("error");
         setLastError("WebSocket error. Check FastAPI server.");
       };
 
       socket.onclose = () => {
+        if (!shouldReconnect || !isCurrentRequest()) {
+          return;
+        }
+
         setConnectionStatus("disconnected");
         reconnectTimer = window.setTimeout(connectWebSocket, 3000);
       };
@@ -98,12 +161,24 @@ function App() {
     connectWebSocket();
 
     return () => {
+      shouldReconnect = false;
+
       if (reconnectTimer !== null) {
         window.clearTimeout(reconnectTimer);
       }
 
       if (socket !== null) {
-        socket.close();
+        socket.onopen = null;
+        socket.onmessage = null;
+        socket.onerror = null;
+        socket.onclose = null;
+
+        if (
+          socket.readyState === WebSocket.CONNECTING ||
+          socket.readyState === WebSocket.OPEN
+        ) {
+          socket.close(1000, "symbol changed");
+        }
       }
     };
   }, [symbol]);
