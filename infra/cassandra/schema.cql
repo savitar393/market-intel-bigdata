@@ -77,3 +77,21 @@ CREATE TABLE IF NOT EXISTS model_registry (
   notes text,
   PRIMARY KEY ((model_name), version)
 );
+
+CREATE TABLE IF NOT EXISTS alerts_by_symbol (
+  symbol text,
+  alert_time timestamp,
+  alert_id text,
+  event_time timestamp,
+  prediction_time timestamp,
+  model_name text,
+  alert_type text,
+  severity text,
+  predicted_direction int,
+  probability_down double,
+  probability_up double,
+  confidence double,
+  message text,
+  source text,
+  PRIMARY KEY ((symbol), alert_time, alert_id)
+) WITH CLUSTERING ORDER BY (alert_time DESC);
