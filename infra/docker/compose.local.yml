@@ -20,5 +20,34 @@ services:
       - cassandra_data:/var/lib/cassandra
     restart: unless-stopped
 
+  api:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    container_name: market_api
+    ports:
+      - "8000:8000"
+    environment:
+      CASSANDRA_HOSTS: cassandra
+      CASSANDRA_PORT: 9042
+      CASSANDRA_KEYSPACE: market_intel
+    depends_on:
+      - cassandra
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ../..
+      dockerfile: services/dashboard/Dockerfile
+      args:
+        VITE_API_BASE: http://localhost:8000
+        VITE_WS_BASE: ws://localhost:8000
+    container_name: market_dashboard
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   cassandra_data:
