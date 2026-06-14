@@ -13,13 +13,13 @@ The target variable is `target_direction`:
 
 | Model | Train rows | Test rows | Accuracy | F1 | Precision | Recall | ROC-AUC |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| logistic_regression | 1096 | 456 | 0.4825 | 0.4647 | 0.4807 | 0.4825 | 0.4669 |
-| random_forest | 1096 | 456 | 0.4496 | 0.4429 | 0.4475 | 0.4496 | 0.4426 |
-| gradient_boosted_trees | 1096 | 456 | 0.4978 | 0.4975 | 0.4979 | 0.4978 | 0.4753 |
+| logistic_regression | 1070 | 446 | 0.4933 | 0.4930 | 0.5034 | 0.4933 | 0.5047 |
+| random_forest | 1070 | 446 | 0.4529 | 0.4527 | 0.4622 | 0.4529 | 0.4443 |
+| gradient_boosted_trees | 1070 | 446 | 0.4596 | 0.4605 | 0.4670 | 0.4596 | 0.4410 |
 
 ## Champion model
 
-Champion model: **gradient_boosted_trees**
+Champion model: **logistic_regression**
 
 The champion model is selected using F1 score as the primary metric. Accuracy and ROC-AUC are used as secondary tie-breakers.
 
@@ -34,8 +34,31 @@ The current dataset uses a limited historical window and a simple target. Future
 - `market_price`
 - `volume`
 - `return_1`
+- `return_2`
+- `return_3`
+- `return_5`
+- `return_10`
 - `rolling_mean_3`
+- `rolling_mean_5`
+- `rolling_mean_10`
+- `rolling_mean_30`
+- `rolling_price_std_5`
+- `rolling_price_std_10`
+- `rolling_price_std_30`
 - `rolling_volatility_3`
+- `rolling_volatility_5`
+- `rolling_volatility_10`
+- `rolling_volatility_30`
+- `rolling_volume_mean_5`
+- `rolling_volume_mean_10`
+- `volume_surprise_5`
+- `volume_surprise_10`
+- `log_volume`
+- `bar_range`
+- `candle_body`
+- `upper_shadow`
+- `lower_shadow`
+- `minute_of_day`
 - `news_count`
 - `avg_sentiment_score`
 - `positive_news_count`
