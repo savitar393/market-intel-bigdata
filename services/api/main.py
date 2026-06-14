@@ -8,6 +8,17 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+import time
+
+from fastapi import Request, Response
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
+
 load_dotenv()
 
 CASSANDRA_HOSTS = [
@@ -17,6 +28,103 @@ CASSANDRA_HOSTS = [
 ]
 CASSANDRA_PORT = int(os.getenv("CASSANDRA_PORT", "9042"))
 CASSANDRA_KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "market_intel")
+
+MONITOR_SYMBOLS = [
+    s.strip().upper()
+    for s in os.getenv("MONITOR_SYMBOLS", "AAPL,MSFT,NVDA,BTC-USD").split(",")
+    if s.strip()
+]
+METRICS_REFRESH_SECONDS = float(os.getenv("METRICS_REFRESH_SECONDS", "10"))
+
+HTTP_REQUESTS_TOTAL = Counter(
+    "market_intel_api_requests_total",
+    "Total FastAPI HTTP requests.",
+    ["method", "path", "status_code"],
+)
+
+HTTP_REQUEST_DURATION_SECONDS = Histogram(
+    "market_intel_api_request_duration_seconds",
+    "FastAPI HTTP request duration in seconds.",
+    ["method", "path"],
+)
+
+WEBSOCKET_ACTIVE_CONNECTIONS = Gauge(
+    "market_intel_websocket_active_connections",
+    "Active WebSocket connections.",
+    ["endpoint", "symbol"],
+)
+
+MARKET_ROWS_WINDOW = Gauge(
+    "market_intel_market_rows_window",
+    "Market rows returned in the latest monitoring window.",
+    ["symbol"],
+)
+
+NEWS_ROWS_WINDOW = Gauge(
+    "market_intel_news_rows_window",
+    "News rows returned in the latest monitoring window.",
+    ["symbol"],
+)
+
+PREDICTION_ROWS_WINDOW = Gauge(
+    "market_intel_prediction_rows_window",
+    "Prediction rows returned in the latest monitoring window.",
+    ["symbol"],
+)
+
+ALERT_ROWS_WINDOW = Gauge(
+    "market_intel_alert_rows_window",
+    "Alert rows returned in the latest monitoring window.",
+    ["symbol"],
+)
+
+MARKET_AVG_INGEST_LATENCY_SECONDS = Gauge(
+    "market_intel_market_avg_ingest_latency_seconds",
+    "Average market ingest latency in the latest monitoring window.",
+    ["symbol"],
+)
+
+NEWS_AVG_INGEST_LATENCY_SECONDS = Gauge(
+    "market_intel_news_avg_ingest_latency_seconds",
+    "Average news ingest latency in the latest monitoring window.",
+    ["symbol"],
+)
+
+MARKET_INGEST_FRESHNESS_SECONDS = Gauge(
+    "market_intel_market_ingest_freshness_seconds",
+    "Seconds since latest market ingest time.",
+    ["symbol"],
+)
+
+NEWS_INGEST_FRESHNESS_SECONDS = Gauge(
+    "market_intel_news_ingest_freshness_seconds",
+    "Seconds since latest news ingest time.",
+    ["symbol"],
+)
+
+PREDICTION_FRESHNESS_SECONDS = Gauge(
+    "market_intel_prediction_freshness_seconds",
+    "Seconds since latest prediction time.",
+    ["symbol"],
+)
+
+ALERT_FRESHNESS_SECONDS = Gauge(
+    "market_intel_alert_freshness_seconds",
+    "Seconds since latest alert time.",
+    ["symbol"],
+)
+
+LATEST_PREDICTION_CONFIDENCE = Gauge(
+    "market_intel_latest_prediction_confidence",
+    "Latest model prediction confidence.",
+    ["symbol"],
+)
+
+LATEST_ALERT_CONFIDENCE = Gauge(
+    "market_intel_latest_alert_confidence",
+    "Latest alert confidence.",
+    ["symbol"],
+)
 
 cluster: Cluster | None = None
 session = None
@@ -35,6 +143,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def prometheus_http_middleware(request: Request, call_next):
+    start_time = time.perf_counter()
+
+    response = await call_next(request)
+
+    duration = time.perf_counter() - start_time
+    path = request.url.path
+
+    HTTP_REQUESTS_TOTAL.labels(
+        method=request.method,
+        path=path,
+        status_code=str(response.status_code),
+    ).inc()
+
+    HTTP_REQUEST_DURATION_SECONDS.labels(
+        method=request.method,
+        path=path,
+    ).observe(duration)
+
+    return response
 
 def get_session():
     global cluster, session
@@ -95,6 +224,65 @@ def average_numeric(items: list[dict], key: str) -> float | None:
         return None
 
     return sum(values) / len(values)
+
+def update_symbol_prometheus_metrics(symbol: str):
+    market = fetch_market_rows(symbol, 20)
+    news = fetch_news_rows(symbol, 20)
+    predictions = fetch_prediction_rows(symbol, 20)
+    alerts = fetch_alert_rows(symbol, 20)
+
+    latest_market = market[0] if market else None
+    latest_news = news[0] if news else None
+    latest_prediction = predictions[0] if predictions else None
+    latest_alert = alerts[0] if alerts else None
+
+    MARKET_ROWS_WINDOW.labels(symbol=symbol).set(len(market))
+    NEWS_ROWS_WINDOW.labels(symbol=symbol).set(len(news))
+    PREDICTION_ROWS_WINDOW.labels(symbol=symbol).set(len(predictions))
+    ALERT_ROWS_WINDOW.labels(symbol=symbol).set(len(alerts))
+
+    market_avg_latency = average_numeric(market, "ingest_latency_seconds")
+    news_avg_latency = average_numeric(news, "ingest_latency_seconds")
+
+    if market_avg_latency is not None:
+        MARKET_AVG_INGEST_LATENCY_SECONDS.labels(symbol=symbol).set(market_avg_latency)
+
+    if news_avg_latency is not None:
+        NEWS_AVG_INGEST_LATENCY_SECONDS.labels(symbol=symbol).set(news_avg_latency)
+
+    if latest_market:
+        market_freshness = seconds_since(latest_market.get("ingest_time"))
+        if market_freshness is not None:
+            MARKET_INGEST_FRESHNESS_SECONDS.labels(symbol=symbol).set(market_freshness)
+
+    if latest_news:
+        news_freshness = seconds_since(latest_news.get("ingest_time"))
+        if news_freshness is not None:
+            NEWS_INGEST_FRESHNESS_SECONDS.labels(symbol=symbol).set(news_freshness)
+
+    if latest_prediction:
+        prediction_freshness = seconds_since(latest_prediction.get("prediction_time"))
+        if prediction_freshness is not None:
+            PREDICTION_FRESHNESS_SECONDS.labels(symbol=symbol).set(prediction_freshness)
+
+        predicted_direction = latest_prediction.get("predicted_direction")
+        confidence = None
+
+        if predicted_direction == 1:
+            confidence = latest_prediction.get("probability_up")
+        elif predicted_direction == 0:
+            confidence = latest_prediction.get("probability_down")
+
+        if confidence is not None:
+            LATEST_PREDICTION_CONFIDENCE.labels(symbol=symbol).set(float(confidence))
+
+    if latest_alert:
+        alert_freshness = seconds_since(latest_alert.get("alert_time"))
+        if alert_freshness is not None:
+            ALERT_FRESHNESS_SECONDS.labels(symbol=symbol).set(alert_freshness)
+
+        if latest_alert.get("confidence") is not None:
+            LATEST_ALERT_CONFIDENCE.labels(symbol=symbol).set(float(latest_alert["confidence"]))
 
 def fetch_market_rows(symbol: str, limit: int = 20) -> list[dict]:
     safe_limit = max(1, min(limit, 100))
@@ -397,6 +585,13 @@ def system_summary(
         ),
     }
 
+@app.get("/metrics")
+def prometheus_metrics():
+    return Response(
+        content=generate_latest(),
+        media_type=CONTENT_TYPE_LATEST,
+    )
+
 @app.websocket("/ws/market/{symbol}")
 async def ws_market(
     websocket: WebSocket,
@@ -404,6 +599,11 @@ async def ws_market(
     interval_seconds: float = Query(default=2.0, ge=0.5, le=10.0),
 ):
     await websocket.accept()
+
+    WEBSOCKET_ACTIVE_CONNECTIONS.labels(
+        endpoint="market",
+        symbol=normalized_symbol,
+    ).inc()
 
     normalized_symbol = symbol.upper()
 
@@ -420,6 +620,10 @@ async def ws_market(
             await asyncio.sleep(interval_seconds)
 
     except WebSocketDisconnect:
+        WEBSOCKET_ACTIVE_CONNECTIONS.labels(
+            endpoint="market",
+            symbol=normalized_symbol,
+        ).dec()
         print(f"Market WebSocket disconnected: {normalized_symbol}")
 
 
@@ -478,9 +682,28 @@ async def ws_live(
         print(f"Live WebSocket disconnected: {normalized_symbol}")
 
 
+async def refresh_prometheus_metrics_loop():
+    while True:
+        for symbol in MONITOR_SYMBOLS:
+            try:
+                update_symbol_prometheus_metrics(symbol)
+            except Exception as exc:
+                print(f"Failed to update Prometheus metrics for {symbol}: {exc}")
+
+        await asyncio.sleep(METRICS_REFRESH_SECONDS)
+
+
+@app.on_event("startup")
+async def startup_event():
+    app.state.metrics_task = asyncio.create_task(refresh_prometheus_metrics_loop())
+
 @app.on_event("shutdown")
 def shutdown_event():
     global cluster
+
+    metrics_task = getattr(app.state, "metrics_task", None)
+    if metrics_task is not None:
+        metrics_task.cancel()
 
     if cluster is not None:
         cluster.shutdown()
