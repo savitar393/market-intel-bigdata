@@ -5,3 +5,20 @@ services:
     ports:
       - "9092:9092"
     restart: unless-stopped
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: market_cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_CLUSTER_NAME: market-intel-cluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    restart: unless-stopped
+
+volumes:
+  cassandra_data:
