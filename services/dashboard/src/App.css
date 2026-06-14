@@ -238,3 +238,63 @@ select {
     min-width: 760px;
   }
 }
+
+.alert-high,
+.alert-high.metric {
+  color: #fca5a5;
+}
+
+.alert-medium,
+.alert-medium.metric {
+  color: #fde68a;
+}
+
+.alert-low,
+.alert-low.metric,
+.alert-none,
+.alert-none.metric {
+  color: #cbd5e1;
+}
+
+.alert-list {
+  display: grid;
+  gap: 12px;
+}
+
+.alert-item {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 16px;
+  border-top: 1px solid #334155;
+  padding-top: 14px;
+}
+
+.alert-item h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.alert-badge {
+  text-align: center;
+  height: fit-content;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.alert-badge.alert-high {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.alert-badge.alert-medium {
+  background: #713f12;
+  color: #fde68a;
+}
+
+.alert-badge.alert-low {
+  background: #334155;
+  color: #cbd5e1;
+}
