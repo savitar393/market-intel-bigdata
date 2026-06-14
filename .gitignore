@@ -7,3 +7,8 @@ data/processed/
 .DS_Store
 .idea/
 .vscode/
+data/checkpoints/
+data/processed/
+spark-warehouse/
+metastore_db/
+derby.log

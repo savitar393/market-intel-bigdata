@@ -4,3 +4,4 @@ databento
 pandas
 yfinance
 finnhub-python
+pyspark==3.5.6
