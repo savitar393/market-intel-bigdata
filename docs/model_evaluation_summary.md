@@ -13,13 +13,13 @@ The target variable is `target_direction`:
 
 | Model | Train rows | Test rows | Accuracy | F1 | Precision | Recall | ROC-AUC |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| logistic_regression | 1070 | 446 | 0.4933 | 0.4930 | 0.5034 | 0.4933 | 0.5047 |
-| random_forest | 1070 | 446 | 0.4529 | 0.4527 | 0.4622 | 0.4529 | 0.4443 |
-| gradient_boosted_trees | 1070 | 446 | 0.4596 | 0.4605 | 0.4670 | 0.4596 | 0.4410 |
+| logistic_regression | 1060 | 456 | 0.4890 | 0.4642 | 0.4833 | 0.4890 | 0.4876 |
+| random_forest | 1060 | 456 | 0.4715 | 0.4628 | 0.4679 | 0.4715 | 0.4667 |
+| gradient_boosted_trees | 1060 | 456 | 0.4803 | 0.4780 | 0.4808 | 0.4803 | 0.4798 |
 
 ## Champion model
 
-Champion model: **logistic_regression**
+Champion model: **gradient_boosted_trees**
 
 The champion model is selected using F1 score as the primary metric. Accuracy and ROC-AUC are used as secondary tie-breakers.
 

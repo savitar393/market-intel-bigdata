@@ -14,7 +14,8 @@ from pyspark.ml.evaluation import (
 )
 from pyspark.ml.feature import VectorAssembler
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, isnan, when
+from pyspark.sql import Window
+from pyspark.sql.functions import col, isnan, when, count, row_number
 
 
 FEATURE_PATH = os.getenv(
@@ -118,8 +119,19 @@ def main():
     print("Class distribution:")
     cleaned.groupBy(LABEL_COLUMN).count().show()
 
-    # Use deterministic split.
-    train_df, test_df = cleaned.randomSplit([0.7, 0.3], seed=42)
+    # Time-aware split per symbol to reduce future leakage compared with random split.
+    symbol_window = Window.partitionBy("symbol").orderBy("event_minute")
+    symbol_count_window = Window.partitionBy("symbol")
+
+    indexed = (
+        cleaned
+        .withColumn("_row_num", row_number().over(symbol_window))
+        .withColumn("_symbol_count", count("*").over(symbol_count_window))
+        .withColumn("_train_cutoff", col("_symbol_count") * 0.7)
+    )
+
+    train_df = indexed.where(col("_row_num") <= col("_train_cutoff")).cache()
+    test_df = indexed.where(col("_row_num") > col("_train_cutoff")).cache()
 
     if train_df.count() == 0 or test_df.count() == 0:
         raise RuntimeError("Train/test split produced empty data. Generate more rows.")
@@ -202,6 +214,7 @@ def main():
                 "roc_auc": safe_metric(auc_eval, predictions),
                 "feature_columns": FEATURE_COLUMNS,
                 "label_column": LABEL_COLUMN,
+                "split_strategy": "time_based_70_30_per_symbol",
             }
 
             print(json.dumps(metrics, indent=2))
