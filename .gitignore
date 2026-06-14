@@ -19,3 +19,6 @@ data/processed/
 spark-warehouse/
 metastore_db/
 derby.log
+
+# Generated ML feature datasets
+data/features/
