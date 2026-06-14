@@ -35,6 +35,7 @@ type LiveSnapshot = {
   market: MarketItem[];
   news: NewsItem[];
   predictions: PredictionItem[];
+  alerts: AlertItem[];
   generated_at: string;
 };
 
@@ -48,6 +49,22 @@ type PredictionItem = {
   probability_down: number;
   probability_up: number;
   target_direction?: number | null;
+  source: string;
+};
+
+type AlertItem = {
+  symbol: string;
+  alert_time: string;
+  event_time: string;
+  prediction_time: string;
+  model_name: string;
+  alert_type: string;
+  severity: string;
+  predicted_direction: number;
+  probability_down: number;
+  probability_up: number;
+  confidence: number;
+  message: string;
   source: string;
 };
 
@@ -104,6 +121,7 @@ function App() {
           market: data.market ?? [],
           news: data.news ?? [],
           predictions: data.predictions ?? [],
+          alerts: data.alerts ?? [],
           generated_at: data.generated_at,
         });
       } catch (error) {
@@ -214,6 +232,9 @@ function App() {
   const predictionItems = snapshot?.predictions ?? [];
   const latestPrediction = predictionItems[0];
 
+  const alertItems = snapshot?.alerts ?? [];
+  const latestAlert = alertItems[0];
+
   const predictionLabel =
     latestPrediction?.predicted_direction === 1
       ? "UP"
@@ -306,6 +327,18 @@ function App() {
               : "-"}
           </p>
         </article>
+
+        <article className="card">
+          <h2>Latest Alert</h2>
+          <p className={`metric alert-${latestAlert?.severity ?? "none"}`}>
+            {latestAlert?.severity?.toUpperCase() ?? "-"}
+          </p>
+          <p className="muted">
+            {latestAlert?.confidence !== undefined
+              ? `${(latestAlert.confidence * 100).toFixed(1)}% confidence`
+              : "No active alert"}
+          </p>
+        </article>
       </section>
 
       <section className="panel">
@@ -370,6 +403,34 @@ function App() {
                       : "-"}
                 </span>
               </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>Prediction Alerts</h2>
+
+        {alertItems.length === 0 && (
+          <p className="muted">No alert records found for {symbol}.</p>
+        )}
+
+        {alertItems.length > 0 && (
+          <div className="alert-list">
+            {alertItems.slice(0, 10).map((item) => (
+              <article key={item.alert_time + item.message} className="alert-item">
+                <div className={`alert-badge alert-${item.severity}`}>
+                  {item.severity}
+                </div>
+
+                <div>
+                  <h3>{item.message}</h3>
+                  <p className="muted">
+                    {new Date(item.alert_time).toLocaleString()} ·{" "}
+                    {item.alert_type} · {item.model_name}
+                  </p>
+                </div>
+              </article>
             ))}
           </div>
         )}
