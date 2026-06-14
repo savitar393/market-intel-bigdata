@@ -34,7 +34,21 @@ type LiveSnapshot = {
   symbol: string;
   market: MarketItem[];
   news: NewsItem[];
+  predictions: PredictionItem[];
   generated_at: string;
+};
+
+type PredictionItem = {
+  symbol: string;
+  event_time: string;
+  prediction_time: string;
+  model_name: string;
+  market_price: number;
+  predicted_direction: number;
+  probability_down: number;
+  probability_up: number;
+  target_direction?: number | null;
+  source: string;
 };
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
@@ -89,6 +103,7 @@ function App() {
           symbol: data.symbol,
           market: data.market ?? [],
           news: data.news ?? [],
+          predictions: data.predictions ?? [],
           generated_at: data.generated_at,
         });
       } catch (error) {
@@ -196,6 +211,23 @@ function App() {
   const latestMarket = snapshot?.market?.[0];
   const newsItems = snapshot?.news ?? [];
 
+  const predictionItems = snapshot?.predictions ?? [];
+  const latestPrediction = predictionItems[0];
+
+  const predictionLabel =
+    latestPrediction?.predicted_direction === 1
+      ? "UP"
+      : latestPrediction?.predicted_direction === 0
+        ? "DOWN"
+        : "-";
+
+  const predictionConfidence =
+    latestPrediction?.predicted_direction === 1
+      ? latestPrediction?.probability_up
+      : latestPrediction?.predicted_direction === 0
+        ? latestPrediction?.probability_down
+        : null;
+
   return (
     <main className="page">
       <section className="hero">
@@ -261,6 +293,19 @@ function App() {
           </p>
           <p className="muted">Spark process time minus ingest time</p>
         </article>
+
+        <article className="card">
+          <h2>Model Prediction</h2>
+          <p className={`metric prediction-${predictionLabel.toLowerCase()}`}>
+            {predictionLabel}
+          </p>
+          <p className="muted">
+            confidence{" "}
+            {predictionConfidence !== null && predictionConfidence !== undefined
+              ? `${(predictionConfidence * 100).toFixed(1)}%`
+              : "-"}
+          </p>
+        </article>
       </section>
 
       <section className="panel">
@@ -282,6 +327,52 @@ function App() {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </section>
+
+      <section className="panel">
+        <h2>Latest Model Predictions</h2>
+
+        {predictionItems.length === 0 && (
+          <p className="muted">No prediction records found for {symbol}.</p>
+        )}
+
+        {predictionItems.length > 0 && (
+          <div className="prediction-table">
+            <div className="prediction-row prediction-header">
+              <span>Time</span>
+              <span>Model</span>
+              <span>Prediction</span>
+              <span>Prob. Up</span>
+              <span>Prob. Down</span>
+              <span>Actual</span>
+            </div>
+
+            {predictionItems.slice(0, 10).map((item) => (
+              <div key={item.event_time + item.model_name} className="prediction-row">
+                <span>{new Date(item.event_time).toLocaleString()}</span>
+                <span>{item.model_name}</span>
+                <span
+                  className={
+                    item.predicted_direction === 1
+                      ? "prediction-up"
+                      : "prediction-down"
+                  }
+                >
+                  {item.predicted_direction === 1 ? "UP" : "DOWN"}
+                </span>
+                <span>{(item.probability_up * 100).toFixed(1)}%</span>
+                <span>{(item.probability_down * 100).toFixed(1)}%</span>
+                <span>
+                  {item.target_direction === 1
+                    ? "UP"
+                    : item.target_direction === 0
+                      ? "DOWN"
+                      : "-"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="panel">
