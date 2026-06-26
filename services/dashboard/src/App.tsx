@@ -68,6 +68,42 @@ type AlertItem = {
   source: string;
 };
 
+type SystemSummary = {
+  symbol: string;
+  generated_at: string;
+  counts: {
+    market_rows: number;
+    news_rows: number;
+    prediction_rows: number;
+    alert_rows: number;
+  };
+  market: {
+    latest_source?: string | null;
+    latest_market_price?: number | null;
+    avg_ingest_latency_seconds?: number | null;
+    event_time_lag_seconds?: number | null;
+    ingest_time_freshness_seconds?: number | null;
+    spark_process_freshness_seconds?: number | null;
+  };
+  news: {
+    avg_ingest_latency_seconds?: number | null;
+    event_time_lag_seconds?: number | null;
+    ingest_time_freshness_seconds?: number | null;
+  };
+  prediction: {
+    model_name?: string | null;
+    predicted_direction?: number | null;
+    confidence?: number | null;
+    prediction_freshness_seconds?: number | null;
+  };
+  alert: {
+    latest_severity?: string | null;
+    latest_confidence?: number | null;
+    alert_freshness_seconds?: number | null;
+  };
+  note?: string;
+};
+
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 const WS_BASE = import.meta.env.VITE_WS_BASE ?? "ws://localhost:8000";
 
@@ -78,6 +114,7 @@ function App() {
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [lastError, setLastError] = useState<string | null>(null);
+  const [systemSummary, setSystemSummary] = useState<SystemSummary | null>(null);
   const requestSeqRef = useRef(0);
 
   useEffect(() => {
@@ -212,6 +249,78 @@ function App() {
         ) {
           socket.close(1000, "symbol changed");
         }
+      }
+    };
+  }, [symbol]);
+
+  function formatSeconds(value?: number | null) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return "-";
+      }
+
+      if (value < 60) {
+        return `${value.toFixed(1)}s`;
+      }
+
+      if (value < 3600) {
+        return `${(value / 60).toFixed(1)}m`;
+      }
+
+      if (value < 86400) {
+        return `${(value / 3600).toFixed(1)}h`;
+      }
+
+      return `${(value / 86400).toFixed(1)}d`;
+  }
+
+  function formatPercent(value?: number | null) {
+    if (value === null || value === undefined || Number.isNaN(value)) {
+      return "-";
+    }
+
+    return `${(value * 100).toFixed(1)}%`;
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | null = null;
+
+    const encodedSymbol = encodeURIComponent(symbol);
+
+    async function loadSystemSummary() {
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/v1/system/summary/${encodedSymbol}?limit=20`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!cancelled) {
+          setSystemSummary(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("System summary failed:", error);
+        }
+      }
+
+      if (!cancelled) {
+        timer = window.setTimeout(loadSystemSummary, 5000);
+      }
+    }
+
+    setSystemSummary(null);
+    loadSystemSummary();
+
+    return () => {
+      cancelled = true;
+
+      if (timer !== null) {
+        window.clearTimeout(timer);
       }
     };
   }, [symbol]);
@@ -433,6 +542,84 @@ function App() {
               </article>
             ))}
           </div>
+        )}
+      </section>
+
+      <section className="panel">
+        <h2>System Performance Summary</h2>
+
+        {!systemSummary && (
+          <p className="muted">Loading system metrics for {symbol}...</p>
+        )}
+
+        {systemSummary && (
+          <>
+            <div className="system-grid">
+              <article className="system-metric">
+                <span className="system-label">Market Latency</span>
+                <strong>
+                  {formatSeconds(systemSummary.market.avg_ingest_latency_seconds)}
+                </strong>
+                <span className="muted">avg ingest latency</span>
+              </article>
+
+              <article className="system-metric">
+                <span className="system-label">Market Freshness</span>
+                <strong>
+                  {formatSeconds(systemSummary.market.ingest_time_freshness_seconds)}
+                </strong>
+                <span className="muted">since latest ingest</span>
+              </article>
+
+              <article className="system-metric">
+                <span className="system-label">Prediction Freshness</span>
+                <strong>
+                  {formatSeconds(systemSummary.prediction.prediction_freshness_seconds)}
+                </strong>
+                <span className="muted">
+                  {systemSummary.prediction.model_name ?? "no model"}
+                </span>
+              </article>
+
+              <article className="system-metric">
+                <span className="system-label">Alert Freshness</span>
+                <strong>
+                  {formatSeconds(systemSummary.alert.alert_freshness_seconds)}
+                </strong>
+                <span className="muted">
+                  {systemSummary.alert.latest_severity ?? "no alert"}
+                </span>
+              </article>
+
+              <article className="system-metric">
+                <span className="system-label">Prediction Confidence</span>
+                <strong>{formatPercent(systemSummary.prediction.confidence)}</strong>
+                <span className="muted">
+                  direction{" "}
+                  {systemSummary.prediction.predicted_direction === 1
+                    ? "UP"
+                    : systemSummary.prediction.predicted_direction === 0
+                      ? "DOWN"
+                      : "-"}
+                </span>
+              </article>
+
+              <article className="system-metric">
+                <span className="system-label">Window Rows</span>
+                <strong>
+                  {systemSummary.counts.market_rows}/
+                  {systemSummary.counts.news_rows}/
+                  {systemSummary.counts.prediction_rows}/
+                  {systemSummary.counts.alert_rows}
+                </strong>
+                <span className="muted">market/news/pred/alert</span>
+              </article>
+            </div>
+
+            <p className="muted system-note">
+              {systemSummary.note}
+            </p>
+          </>
         )}
       </section>
 

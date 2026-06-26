@@ -298,3 +298,41 @@ select {
   background: #334155;
   color: #cbd5e1;
 }
+
+.system-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.system-metric {
+  border: 1px solid #334155;
+  background: rgba(2, 6, 23, 0.45);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.system-label {
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.system-metric strong {
+  font-size: 24px;
+}
+
+.system-note {
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .system-grid {
+    grid-template-columns: 1fr;
+  }
+}
