@@ -156,3 +156,11 @@ log-mlflow:
 .PHONY: log-mlflow-artifacts
 log-mlflow-artifacts:
 > python ml/tracking/log_mlflow_runs.py --all --log-model-artifacts
+
+.PHONY: validate-finnhub-ws
+validate-finnhub-ws:
+> python services/producers/validate_finnhub_ws.py
+
+.PHONY: produce-finnhub-ws
+produce-finnhub-ws:
+> python services/producers/finnhub_ws_producer.py --max-messages 20
