@@ -90,8 +90,55 @@ services:
       - mlflow_data:/mlflow
     restart: unless-stopped
 
+  hadoop-namenode:
+    image: apache/hadoop:3.4.1
+    container_name: market_hadoop_namenode
+    hostname: hadoop-namenode
+    user: root
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      HADOOP_HOME: /opt/hadoop
+      HADOOP_CONF_DIR: /opt/hadoop/etc/hadoop
+    command: >
+      bash -c "
+      if [ ! -f /tmp/hadoop-root/dfs/name/current/VERSION ]; then
+        hdfs namenode -format -force -nonInteractive;
+      fi;
+      hdfs namenode
+      "
+    volumes:
+      - hadoop_namenode:/tmp/hadoop-root/dfs/name
+      - ../hdfs/conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
+      - ../hdfs/conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml:ro
+    restart: unless-stopped
+
+  hadoop-datanode:
+    image: apache/hadoop:3.4.1
+    container_name: market_hadoop_datanode
+    hostname: hadoop-datanode
+    user: root
+    depends_on:
+      - hadoop-namenode
+    environment:
+      HADOOP_HOME: /opt/hadoop
+      HADOOP_CONF_DIR: /opt/hadoop/etc/hadoop
+    command: >
+      bash -c "
+      sleep 10;
+      hdfs datanode
+      "
+    volumes:
+      - hadoop_datanode:/tmp/hadoop-root/dfs/data
+      - ../hdfs/conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml:ro
+      - ../hdfs/conf/hdfs-site.xml:/opt/hadoop/etc/hadoop/hdfs-site.xml:ro
+    restart: unless-stopped
+
 volumes:
   cassandra_data:
   prometheus_data:
   grafana_data:
   mlflow_data:
+  hadoop_namenode:
+  hadoop_datanode:
