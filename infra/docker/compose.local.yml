@@ -79,7 +79,19 @@ services:
       - prometheus
     restart: unless-stopped
 
+  mlflow:
+    build:
+      context: ../..
+      dockerfile: infra/mlflow/Dockerfile
+    container_name: market_mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    restart: unless-stopped
+
 volumes:
   cassandra_data:
   prometheus_data:
   grafana_data:
+  mlflow_data:
