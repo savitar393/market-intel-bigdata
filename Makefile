@@ -164,3 +164,19 @@ validate-finnhub-ws:
 .PHONY: produce-finnhub-ws
 produce-finnhub-ws:
 > python services/producers/finnhub_ws_producer.py --max-messages 20
+
+.PHONY: hdfs-up
+hdfs-up:
+> docker compose -f $(COMPOSE_FILE) up -d --build hadoop-namenode hadoop-datanode
+
+.PHONY: hdfs-init
+hdfs-init:
+> bash infra/hdfs/init_hdfs_dirs.sh
+
+.PHONY: hdfs-ls
+hdfs-ls:
+> docker exec market_hadoop_namenode hdfs dfs -ls -R /market-intel
+
+.PHONY: archive-hdfs
+archive-hdfs:
+> bash scripts/archive_to_hdfs.sh
