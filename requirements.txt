@@ -12,3 +12,4 @@ websockets
 requests
 prometheus-client
 mlflow
+prefect

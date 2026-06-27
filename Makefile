@@ -180,3 +180,15 @@ hdfs-ls:
 .PHONY: archive-hdfs
 archive-hdfs:
 > bash scripts/archive_to_hdfs.sh
+
+.PHONY: prefect-validate-sources
+prefect-validate-sources:
+> python orchestration/source_validation_flow.py
+
+.PHONY: prefect-ml-refresh
+prefect-ml-refresh:
+> python orchestration/ml_refresh_flow.py
+
+.PHONY: prefect-ui
+prefect-ui:
+> prefect server start --host 0.0.0.0
