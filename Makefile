@@ -192,3 +192,15 @@ prefect-ml-refresh:
 .PHONY: prefect-ui
 prefect-ui:
 > prefect server start --host 0.0.0.0
+
+.PHONY: export-online-model
+export-online-model:
+> python ml/serving/export_logistic_regression_online.py
+
+.PHONY: online-inference
+online-inference:
+> python services/inference/online_market_inference.py
+
+.PHONY: online-inference-test
+online-inference-test:
+> python services/inference/online_market_inference.py --max-predictions 5
