@@ -192,3 +192,11 @@ prefect-ml-refresh:
 .PHONY: prefect-ui
 prefect-ui:
 > prefect server start --host 0.0.0.0
+
+.PHONY: eval-pack
+eval-pack:
+> python ml/evaluation/build_model_evaluation_pack.py
+
+.PHONY: horizon-experiments
+horizon-experiments:
+> bash scripts/run_horizon_experiments.sh
