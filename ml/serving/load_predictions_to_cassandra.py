@@ -15,6 +15,10 @@ MODEL_ARTIFACT_DIR = Path(
 
 CHAMPION_PATH = MODEL_ARTIFACT_DIR / "champion_model.json"
 
+FINAL_SERVING_CONFIG_PATH = Path(
+    os.getenv("FINAL_SERVING_CONFIG_PATH", "config/final_model_serving.json")
+)
+
 CASSANDRA_HOSTS = [
     h.strip()
     for h in os.getenv("CASSANDRA_HOSTS", "localhost").split(",")
@@ -41,20 +45,66 @@ def extract_probability(value):
 
     return probability_down, probability_up
 
+def load_serving_config():
+    if FINAL_SERVING_CONFIG_PATH.exists():
+        with FINAL_SERVING_CONFIG_PATH.open("r", encoding="utf-8") as f:
+            return json.load(f)
+
+    return None
+
+def tuned_prediction(row, serving_config):
+    probability_down, probability_up = extract_probability(row.probability)
+
+    if serving_config is None:
+        predicted_direction = int(row.prediction) if row.prediction is not None else None
+        return predicted_direction, probability_down, probability_up
+
+    threshold = float(serving_config.get("threshold", 0.5))
+
+    if probability_up is None:
+        predicted_direction = int(row.prediction) if row.prediction is not None else None
+    else:
+        predicted_direction = 1 if probability_up >= threshold else 0
+
+    return predicted_direction, probability_down, probability_up
 
 def main():
     load_dotenv()
 
-    if not CHAMPION_PATH.exists():
-        raise FileNotFoundError(
-            f"Champion metadata not found: {CHAMPION_PATH}. "
-            "Run ml/evaluation/select_champion_model.py first."
-        )
+    serving_config = load_serving_config()
 
-    with CHAMPION_PATH.open("r", encoding="utf-8") as f:
-        champion_payload = json.load(f)
+    if serving_config is not None:
+        champion_model = serving_config["model_name"]
+        threshold = serving_config.get("threshold")
+        print(f"Using final serving config: model={champion_model}, threshold={threshold}")
+    else:
+        if not CHAMPION_PATH.exists():
+            raise FileNotFoundError(
+                f"Champion metadata not found: {CHAMPION_PATH}. "
+                "Run ml/evaluation/select_champion_model.py first or create config/final_model_serving.json."
+            )
 
-    champion_model = champion_payload["champion_model"]
+        with CHAMPION_PATH.open("r", encoding="utf-8") as f:
+            champion_payload = json.load(f)
+
+        champion_model = champion_payload["champion_model"]
+        print(f"Using champion metadata: model={champion_model}")
+
+    predictions_path = MODEL_ARTIFACT_DIR / f"{champion_model}_predictions"
+
+    serving_config = load_serving_config()
+
+    if serving_config is not None:
+        champion_model = serving_config["model_name"]
+        threshold = serving_config.get("threshold")
+        print(f"Using final serving config: model={champion_model}, threshold={threshold}")
+    else:
+        with CHAMPION_PATH.open("r", encoding="utf-8") as f:
+            champion_payload = json.load(f)
+
+        champion_model = champion_payload["champion_model"]
+        print(f"Using champion metadata: model={champion_model}")
+
     predictions_path = MODEL_ARTIFACT_DIR / f"{champion_model}_predictions"
 
     if not predictions_path.exists():
@@ -106,7 +156,10 @@ def main():
     written = 0
 
     for row in rows:
-        probability_down, probability_up = extract_probability(row.probability)
+        predicted_direction, probability_down, probability_up = tuned_prediction(
+            row,
+            serving_config,
+        )
 
         session.execute(
             insert_query,
@@ -117,11 +170,13 @@ def main():
                 str(uuid4()),
                 champion_model,
                 float(row.market_price) if row.market_price is not None else None,
-                int(row.prediction) if row.prediction is not None else None,
+                predicted_direction,
                 probability_down,
                 probability_up,
                 int(row.target_direction) if row.target_direction is not None else None,
-                "spark_batch_prediction_loader",
+                "spark_batch_prediction_loader_tuned_threshold"
+                if serving_config is not None
+                else "spark_batch_prediction_loader",
             ),
         )
 

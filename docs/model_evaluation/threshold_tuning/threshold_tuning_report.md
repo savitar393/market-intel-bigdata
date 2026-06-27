@@ -8,13 +8,13 @@ Default Spark classification uses a 0.50 threshold. This search tests thresholds
 
 | Rank | Model | Threshold | Accuracy | Weighted F1 | Precision UP | Recall UP | Predicted UP Rate |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 1 | logistic_regression | 0.47 | 0.5374 | 0.5367 | 0.5038 | 0.5959 | 0.5521 |
-| 2 | logistic_regression | 0.48 | 0.5335 | 0.5336 | 0.5003 | 0.5027 | 0.4690 |
-| 3 | logistic_regression | 0.46 | 0.5390 | 0.5332 | 0.5047 | 0.6668 | 0.6167 |
-| 4 | logistic_regression | 0.49 | 0.5356 | 0.5305 | 0.5031 | 0.4210 | 0.3906 |
-| 5 | gradient_boosted_trees | 0.49 | 0.5304 | 0.5296 | 0.4968 | 0.4750 | 0.4462 |
-| 6 | gradient_boosted_trees | 0.50 | 0.5338 | 0.5266 | 0.5008 | 0.4002 | 0.3730 |
-| 7 | gradient_boosted_trees | 0.48 | 0.5259 | 0.5264 | 0.4928 | 0.5383 | 0.5099 |
-| 8 | gradient_boosted_trees | 0.47 | 0.5272 | 0.5260 | 0.4946 | 0.5932 | 0.5598 |
-| 9 | random_forest | 0.49 | 0.5272 | 0.5251 | 0.4929 | 0.4508 | 0.4269 |
-| 10 | logistic_regression | 0.50 | 0.5414 | 0.5240 | 0.5133 | 0.3381 | 0.3074 |
+| 1 | gradient_boosted_trees | 0.48 | 0.5338 | 0.5329 | 0.4899 | 0.4712 | 0.4399 |
+| 2 | logistic_regression | 0.47 | 0.5317 | 0.5323 | 0.4885 | 0.5082 | 0.4757 |
+| 3 | logistic_regression | 0.48 | 0.5390 | 0.5322 | 0.4950 | 0.4037 | 0.3730 |
+| 4 | random_forest | 0.49 | 0.5399 | 0.5313 | 0.4961 | 0.3890 | 0.3586 |
+| 5 | random_forest | 0.48 | 0.5304 | 0.5309 | 0.4870 | 0.5045 | 0.4737 |
+| 6 | logistic_regression | 0.46 | 0.5298 | 0.5292 | 0.4884 | 0.5942 | 0.5564 |
+| 7 | gradient_boosted_trees | 0.49 | 0.5366 | 0.5289 | 0.4916 | 0.3935 | 0.3660 |
+| 8 | gradient_boosted_trees | 0.47 | 0.5274 | 0.5282 | 0.4851 | 0.5465 | 0.5151 |
+| 9 | random_forest | 0.47 | 0.5275 | 0.5257 | 0.4868 | 0.6125 | 0.5754 |
+| 10 | logistic_regression | 0.49 | 0.5456 | 0.5228 | 0.5052 | 0.3089 | 0.2796 |

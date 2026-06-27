@@ -1,0 +1,15 @@
+{
+  "task": "classification_direction",
+  "model_name": "logistic_regression",
+  "label_column": "target_direction_1",
+  "horizon_minutes": 1,
+  "threshold": 0.47,
+  "selection_reason": "Best threshold-tuned weighted F1 from horizon experiment.",
+  "metrics": {
+    "accuracy": 0.5374,
+    "weighted_f1": 0.5367,
+    "precision_up": 0.5038,
+    "recall_up": 0.5959,
+    "predicted_up_rate": 0.5521
+  }
+}
