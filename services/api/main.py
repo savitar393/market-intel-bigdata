@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 from cassandra.cluster import Cluster
@@ -199,18 +199,22 @@ def parse_dt(value):
         return None
 
 
-def seconds_since(value) -> float | None:
-    dt = parse_dt(value)
+def seconds_since(value):
+    parsed = parse_dt(value)
 
-    if dt is None:
+    if parsed is None:
         return None
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
-    if dt.tzinfo is not None:
-        dt = dt.replace(tzinfo=None)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
 
-    return (now - dt).total_seconds()
+    diff = (now - parsed).total_seconds()
+
+    # Historical replay/live-provider clock mismatch can produce future timestamps.
+    # Clamp to zero so freshness remains interpretable in dashboard/report.
+    return max(diff, 0.0)
 
 
 def average_numeric(items: list[dict], key: str) -> float | None:

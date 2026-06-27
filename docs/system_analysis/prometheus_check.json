@@ -1,13 +1,18 @@
 {
   "status_code": 200,
-  "latency_ms": 10.510977997910231,
+  "latency_ms": 8.671371004311368,
   "error": null,
-  "available_metrics": [],
-  "missing_metrics": [
+  "available_metrics": [
     "market_intel_api_requests_total",
     "market_intel_api_request_duration_seconds",
+    "market_intel_websocket_active_connections",
+    "market_intel_market_rows_window",
+    "market_intel_news_rows_window",
+    "market_intel_prediction_rows_window",
+    "market_intel_alert_rows_window",
     "market_intel_market_ingest_freshness_seconds",
     "market_intel_prediction_freshness_seconds",
     "market_intel_alert_freshness_seconds"
-  ]
+  ],
+  "missing_metrics": []
 }

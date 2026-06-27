@@ -1,14 +1,14 @@
 # System Analysis Report
 
-Generated at: `2026-06-27T13:22:47.935886+00:00`
+Generated at: `2026-06-27T14:07:02.789813+00:00`
 
 ## 1. Test Configuration
 
 - API base: `http://localhost:8000`
 - Symbols: `AAPL, MSFT, NVDA, AMZN, TSLA, BTC-USD`
 - Iterations: `5`
-- Started at: `2026-06-27T13:22:09.151596+00:00`
-- Finished at: `2026-06-27T13:22:47.935886+00:00`
+- Started at: `2026-06-27T14:06:23.995423+00:00`
+- Finished at: `2026-06-27T14:07:02.789813+00:00`
 - Total measured requests: `185`
 - Successful requests: `185`
 - Approximate API request throughput during test: `4.77 requests/second`
@@ -17,31 +17,31 @@ Generated at: `2026-06-27T13:22:47.935886+00:00`
 
 | Endpoint | Samples | Avg ms | Median ms | P95 ms | Min ms | Max ms |
 |---|---:|---:|---:|---:|---:|---:|
-| alerts_latest | 30 | 6.66 | 6.45 | 8.51 | 5.26 | 9.32 |
-| dashboard_snapshot | 30 | 14.10 | 12.90 | 16.21 | 9.22 | 30.21 |
-| health | 5 | 11.02 | 5.94 | 6.54 | 5.64 | 31.12 |
-| market_latest | 30 | 7.97 | 7.02 | 9.61 | 5.35 | 32.54 |
-| news_latest | 30 | 6.95 | 6.65 | 8.96 | 4.92 | 10.26 |
-| predictions_latest | 30 | 7.02 | 7.22 | 8.88 | 4.70 | 10.94 |
-| system_summary | 30 | 12.80 | 12.81 | 15.35 | 10.15 | 15.69 |
+| alerts_latest | 30 | 11.14 | 6.39 | 8.45 | 4.59 | 146.64 |
+| dashboard_snapshot | 30 | 13.01 | 12.92 | 16.65 | 9.75 | 18.96 |
+| health | 5 | 9.35 | 6.82 | 7.12 | 6.09 | 20.43 |
+| market_latest | 30 | 6.89 | 6.86 | 8.44 | 5.47 | 8.92 |
+| news_latest | 30 | 6.55 | 6.42 | 8.10 | 4.76 | 8.55 |
+| predictions_latest | 30 | 6.54 | 6.55 | 7.65 | 5.07 | 8.36 |
+| system_summary | 30 | 11.39 | 11.31 | 13.27 | 9.03 | 14.81 |
 
 ## 3. Freshness and Data Availability Snapshot
 
 | Symbol | Market Rows | News Rows | Prediction Rows | Alert Rows | Market Freshness s | Prediction Freshness s | Alert Freshness s | Model | Confidence |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---:|
-| AAPL | 20 | 5 | 20 | 20 | -24618.69 | 97770.98 | 1498.41 | gradient_boosted_trees | 0.5804 |
-| MSFT | 20 | 5 | 20 | 20 | -24618.48 | 1134015.13 | 1498.61 | gradient_boosted_trees | 0.5491 |
-| NVDA | 20 | 5 | 20 | 20 | -24618.26 | 1134015.34 | 1498.80 | gradient_boosted_trees | 0.6111 |
-| AMZN | 20 | 0 | 20 | 6 | -24618.05 | 97771.62 | 1499.00 | gradient_boosted_trees | 0.5066 |
-| TSLA | 20 | 0 | 20 | 2 | -24617.84 | 1515.85 | 1499.20 | logistic_regression | 0.5088 |
-| BTC-USD | 20 | 0 | 0 | 0 | -24727.53 | - | - | - | - |
+| AAPL | 20 | 5 | 20 | 0 | 0.00 | 83.04 | - | logistic_regression | 0.4990 |
+| MSFT | 20 | 5 | 20 | 0 | 0.00 | 83.25 | - | logistic_regression | 0.5338 |
+| NVDA | 20 | 5 | 20 | 6 | 0.00 | 83.46 | 56.10 | logistic_regression | 0.5711 |
+| AMZN | 20 | 0 | 20 | 0 | 0.00 | 83.67 | - | logistic_regression | 0.5043 |
+| TSLA | 20 | 0 | 20 | 2 | 0.00 | 83.88 | 56.52 | logistic_regression | 0.5088 |
+| BTC-USD | 20 | 0 | 0 | 0 | 0.00 | - | - | - | - |
 
 ## 4. Prometheus Metrics Check
 
 - `/metrics` status code: `200`
-- `/metrics` response latency: `10.51 ms`
-- Available expected metrics: `-`
-- Missing expected metrics: `market_intel_api_requests_total, market_intel_api_request_duration_seconds, market_intel_market_ingest_freshness_seconds, market_intel_prediction_freshness_seconds, market_intel_alert_freshness_seconds`
+- `/metrics` response latency: `8.67 ms`
+- Available expected metrics: `market_intel_api_requests_total, market_intel_api_request_duration_seconds, market_intel_websocket_active_connections, market_intel_market_rows_window, market_intel_news_rows_window, market_intel_prediction_rows_window, market_intel_alert_rows_window, market_intel_market_ingest_freshness_seconds, market_intel_prediction_freshness_seconds, market_intel_alert_freshness_seconds`
+- Missing expected metrics: `-`
 
 ## 5. Interpretation
 

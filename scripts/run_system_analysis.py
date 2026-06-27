@@ -112,14 +112,28 @@ def extract_summary_row(symbol: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 def prometheus_check(api_base: str) -> dict[str, Any]:
     url = f"{api_base}/metrics"
-    status_code, payload, error, latency_ms = safe_get_json(url)
+    start = time.perf_counter()
 
-    # /metrics is text, not JSON, so safe_get_json returns text payload.
-    text = payload if isinstance(payload, str) else ""
+    try:
+        response = requests.get(url, timeout=10.0)
+        latency_ms = (time.perf_counter() - start) * 1000.0
+        text = response.text
+        status_code = response.status_code
+        error = None
+    except Exception as exc:
+        latency_ms = (time.perf_counter() - start) * 1000.0
+        text = ""
+        status_code = None
+        error = str(exc)
 
     metric_names = [
         "market_intel_api_requests_total",
         "market_intel_api_request_duration_seconds",
+        "market_intel_websocket_active_connections",
+        "market_intel_market_rows_window",
+        "market_intel_news_rows_window",
+        "market_intel_prediction_rows_window",
+        "market_intel_alert_rows_window",
         "market_intel_market_ingest_freshness_seconds",
         "market_intel_prediction_freshness_seconds",
         "market_intel_alert_freshness_seconds",
