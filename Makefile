@@ -209,3 +209,11 @@ train-cls-h1:
 .PHONY: tune-threshold
 tune-threshold:
 > python ml/evaluation/tune_classification_threshold.py
+
+.PHONY: hybrid-market
+hybrid-market:
+> python services/producers/hybrid_market_producer.py
+
+.PHONY: hybrid-market-test
+hybrid-market-test:
+> python services/producers/hybrid_market_producer.py --live-max-messages 20
