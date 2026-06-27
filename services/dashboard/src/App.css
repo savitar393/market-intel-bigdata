@@ -364,3 +364,77 @@ select {
 .status-bad {
   color: #fca5a5;
 }
+/* Final demo readability polish */
+body,
+#root {
+  color: #e5edf7;
+}
+
+h1,
+h2,
+h3,
+label,
+.card-title,
+.metric-title,
+.panel-title,
+.chart-title,
+.section-title {
+  color: #e5edf7 !important;
+}
+
+p,
+span,
+small,
+.muted,
+.card-subtitle,
+.metric-subtitle {
+  color: #9fb3c8;
+}
+
+.app h1,
+.dashboard h1,
+header h1 {
+  color: #f8fafc !important;
+  font-weight: 800;
+}
+
+.panel h2,
+.panel h3,
+.card h2,
+.card h3,
+.metric-card h2,
+.metric-card h3 {
+  color: #dbeafe !important;
+}
+
+.recharts-text,
+.recharts-cartesian-axis-tick-value,
+.recharts-label {
+  fill: #94a3b8 !important;
+}
+
+table,
+th,
+td {
+  color: #e5edf7;
+}
+
+th {
+  color: #a7c7e7;
+}
+
+.demo-note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  background: rgba(14, 165, 233, 0.08);
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warning-note {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.08);
+}
