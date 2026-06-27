@@ -176,11 +176,29 @@ def main():
 
         .withColumn("minute_of_day", hour(col("event_minute")) * 60 + minute(col("event_minute")))
 
-        .withColumn("next_price", lead("market_price", 1).over(w))
-        .withColumn("target_next_return", (col("next_price") - col("market_price")) / col("market_price"))
-        .withColumn("target_direction", when(col("target_next_return") > 0, 1).otherwise(0))
+        .withColumn("next_price_1", lead("market_price", 1).over(w))
+        .withColumn("next_price_5", lead("market_price", 5).over(w))
+        .withColumn("next_price_10", lead("market_price", 10).over(w))
+
+        .withColumn("target_return_1", (col("next_price_1") - col("market_price")) / col("market_price"))
+        .withColumn("target_return_5", (col("next_price_5") - col("market_price")) / col("market_price"))
+        .withColumn("target_return_10", (col("next_price_10") - col("market_price")) / col("market_price"))
+
+        .withColumn("target_direction_1", when(col("target_return_1") > 0, 1).otherwise(0))
+        .withColumn("target_direction_5", when(col("target_return_5") > 0, 1).otherwise(0))
+        .withColumn("target_direction_10", when(col("target_return_10") > 0, 1).otherwise(0))
+
+        # Backward-compatible default labels.
+        .withColumn("target_next_return", col("target_return_1"))
+        .withColumn("target_direction", col("target_direction_1"))
 
         .select(
+            "target_return_1",
+            "target_return_5",
+            "target_return_10",
+            "target_direction_1",
+            "target_direction_5",
+            "target_direction_10",
             "symbol",
             "event_minute",
             "event_date",
@@ -234,7 +252,7 @@ def main():
             "target_direction",
         )
         .where(col("prev_price_10").isNotNull())
-        .where(col("next_price").isNotNull())
+        .where(col("next_price_10").isNotNull())
     )
 
     print("Feature preview:")

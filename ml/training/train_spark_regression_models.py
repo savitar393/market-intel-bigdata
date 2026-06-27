@@ -69,7 +69,7 @@ FEATURE_COLUMNS = [
     "negative_news_count",
 ]
 
-LABEL_COLUMN = "target_next_return"
+LABEL_COLUMN = os.getenv("REGRESSION_LABEL_COLUMN", "target_next_return")
 
 
 def safe_metric(evaluator, predictions):
