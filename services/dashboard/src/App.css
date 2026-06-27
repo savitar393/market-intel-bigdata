@@ -336,3 +336,31 @@ select {
     grid-template-columns: 1fr;
   }
 }
+
+.demo-note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 14px;
+  background: rgba(14, 165, 233, 0.08);
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warning-note {
+  border-color: rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.status-good {
+  color: #86efac;
+}
+
+.status-warning {
+  color: #fde68a;
+}
+
+.status-bad {
+  color: #fca5a5;
+}

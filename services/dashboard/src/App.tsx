@@ -109,6 +109,11 @@ const WS_BASE = import.meta.env.VITE_WS_BASE ?? "ws://localhost:8000";
 
 const SYMBOLS = ["AAPL", "MSFT", "NVDA", "AMZN", "BTC-USD"];
 
+const FINAL_MODEL_NOTE =
+  "Academic demo only. Final classifier: Logistic Regression, 1-minute horizon, tuned threshold probability_up ≥ 0.47.";
+
+const MARKET_ONLY_SYMBOLS = new Set(["BTC-USD"]);
+
 function App() {
   const [symbol, setSymbol] = useState("AAPL");
   const [snapshot, setSnapshot] = useState<LiveSnapshot | null>(null);
@@ -369,6 +374,10 @@ function App() {
           </p>
         </div>
 
+        <div className="demo-note">
+          <strong>Model note:</strong> {FINAL_MODEL_NOTE}
+        </div>
+
         <div className={`status status-${connectionStatus}`}>
           WebSocket: {connectionStatus}
         </div>
@@ -434,6 +443,12 @@ function App() {
             {predictionConfidence !== null && predictionConfidence !== undefined
               ? `${(predictionConfidence * 100).toFixed(1)}%`
               : "-"}
+
+            {MARKET_ONLY_SYMBOLS.has(symbol) && (
+              <div className="demo-note warning-note">
+                BTC-USD is used for live WebSocket demonstration only. The trained stock prediction model is served for AAPL, MSFT, NVDA, AMZN, and TSLA.
+              </div>
+            )}
           </p>
         </article>
 
