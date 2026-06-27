@@ -204,3 +204,23 @@ online-inference:
 .PHONY: online-inference-test
 online-inference-test:
 > python services/inference/online_market_inference.py --max-predictions 5
+
+.PHONY: online-inference-up
+online-inference-up:
+> docker compose -f $(COMPOSE_FILE) up -d --build online-inference
+
+.PHONY: logs-online-inference
+logs-online-inference:
+> docker logs market_online_inference --tail 100 -f
+
+.PHONY: demo-core-up
+demo-core-up:
+> docker compose -f $(COMPOSE_FILE) up -d --build kafka cassandra api dashboard prometheus grafana mlflow
+
+.PHONY: demo-online-up
+demo-online-up: demo-core-up online-inference-up
+> @echo "Core services and online inference are running."
+
+.PHONY: system-analysis
+system-analysis:
+> python scripts/run_system_analysis.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA,BTC-USD --iterations 5

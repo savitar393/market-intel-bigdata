@@ -1,0 +1,13 @@
+model_name,target,prediction,count
+gradient_boosted_trees,0,0,1770
+gradient_boosted_trees,0,1,587
+gradient_boosted_trees,1,0,1464
+gradient_boosted_trees,1,1,587
+logistic_regression,0,0,2011
+logistic_regression,0,1,346
+logistic_regression,1,0,1631
+logistic_regression,1,1,420
+random_forest,0,0,2135
+random_forest,0,1,222
+random_forest,1,0,1769
+random_forest,1,1,282

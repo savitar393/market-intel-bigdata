@@ -13,9 +13,9 @@ The target variable is `target_direction`:
 
 | Model | Train rows | Test rows | Accuracy | F1 | Precision | Recall | ROC-AUC |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| logistic_regression | 10282 | 4408 | 0.5515 | 0.4972 | 0.5504 | 0.5515 | 0.5610 |
-| random_forest | 10282 | 4408 | 0.5483 | 0.4674 | 0.5528 | 0.5483 | 0.5518 |
-| gradient_boosted_trees | 10282 | 4408 | 0.5347 | 0.5079 | 0.5253 | 0.5347 | 0.5321 |
+| logistic_regression | 16572 | 7104 | 0.5414 | 0.5240 | 0.5349 | 0.5414 | 0.5541 |
+| random_forest | 16572 | 7104 | 0.5286 | 0.5130 | 0.5208 | 0.5286 | 0.5459 |
+| gradient_boosted_trees | 16572 | 7104 | 0.5338 | 0.5266 | 0.5288 | 0.5338 | 0.5441 |
 
 ## Champion model
 

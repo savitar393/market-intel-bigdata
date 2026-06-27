@@ -1,0 +1,7 @@
+symbol,market_rows,news_rows,prediction_rows,alert_rows,market_avg_ingest_latency_seconds,market_ingest_freshness_seconds,news_ingest_freshness_seconds,prediction_freshness_seconds,alert_freshness_seconds,prediction_model,prediction_confidence,latest_alert_severity
+AAPL,20,5,20,0,8.0,-18996.646528,1128547.194506,3050.221507,,logistic_regression,0.4990193469505929,
+MSFT,20,5,20,0,8.0,-18996.428971,1128546.895038,3050.440041,,logistic_regression,0.533832003059714,
+NVDA,20,5,20,6,8.0,-18996.210742,1128546.798263,3050.657264,3023.298265,logistic_regression,0.5710933754711087,medium
+AMZN,20,0,20,0,8.0,-18995.988885,,3050.880122,,logistic_regression,0.504302495075118,
+TSLA,20,0,20,2,8.0,-18995.772697,,3051.096307,3023.731308,logistic_regression,0.5088114417235554,medium
+BTC-USD,20,0,0,0,4.65,-23777.686887,,,,,,
