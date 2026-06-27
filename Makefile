@@ -200,3 +200,12 @@ eval-pack:
 .PHONY: horizon-experiments
 horizon-experiments:
 > bash scripts/run_horizon_experiments.sh
+
+.PHONY: train-cls-h1
+train-cls-h1:
+> rm -rf data/model_artifacts/baseline_models
+> CLASSIFICATION_LABEL_COLUMN=target_direction_1 spark-submit ml/training/train_spark_baseline_models.py
+
+.PHONY: tune-threshold
+tune-threshold:
+> python ml/evaluation/tune_classification_threshold.py
