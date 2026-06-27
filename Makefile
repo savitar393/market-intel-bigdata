@@ -217,3 +217,7 @@ hybrid-market:
 .PHONY: hybrid-market-test
 hybrid-market-test:
 > python services/producers/hybrid_market_producer.py --live-max-messages 20
+
+.PHONY: system-analysis
+system-analysis:
+> python scripts/run_system_analysis.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA,BTC-USD --iterations 5

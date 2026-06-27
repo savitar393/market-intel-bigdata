@@ -1274,3 +1274,33 @@ Recommended next improvements:
 6. Add optional NASA image feature proof-of-concept.
 7. Package cluster/VM deployment instructions.
 ```
+
+## System analysis
+
+Run a serving-layer system analysis:
+
+```bash
+make system-analysis
+```
+
+The script measures:
+
+```text
+API endpoint latency
+API request success rate
+approximate API throughput
+market/news/prediction/alert availability
+data freshness
+Prometheus metric availability
+```
+
+Generated outputs:
+
+```text
+docs/system_analysis/system_analysis_report.md
+docs/system_analysis/api_latency_results.csv
+docs/system_analysis/api_latency_summary.csv
+docs/system_analysis/system_summary_table.csv
+docs/system_analysis/system_summary_snapshot.json
+docs/system_analysis/prometheus_check.json
+```

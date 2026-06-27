@@ -1,0 +1,13 @@
+{
+  "status_code": 200,
+  "latency_ms": 10.510977997910231,
+  "error": null,
+  "available_metrics": [],
+  "missing_metrics": [
+    "market_intel_api_requests_total",
+    "market_intel_api_request_duration_seconds",
+    "market_intel_market_ingest_freshness_seconds",
+    "market_intel_prediction_freshness_seconds",
+    "market_intel_alert_freshness_seconds"
+  ]
+}

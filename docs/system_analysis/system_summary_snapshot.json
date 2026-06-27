@@ -1,0 +1,278 @@
+{
+  "AAPL": {
+    "symbol": "AAPL",
+    "generated_at": "2026-06-27T13:22:46.670356Z",
+    "window_limit": 20,
+    "counts": {
+      "market_rows": 20,
+      "news_rows": 5,
+      "prediction_rows": 20,
+      "alert_rows": 20
+    },
+    "market": {
+      "latest_event_time": "2024-05-25T02:59:00",
+      "latest_ingest_time": "2026-06-27T20:13:05.360000",
+      "latest_spark_process_time": "2026-06-27T20:13:13.863000",
+      "latest_source": "databento_historical_replay",
+      "latest_market_price": 190.0,
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 65960626.670371,
+      "ingest_time_freshness_seconds": -24618.689625,
+      "spark_process_freshness_seconds": -24627.192624
+    },
+    "news": {
+      "latest_event_time": "2026-06-14T03:08:31",
+      "latest_ingest_time": "2026-06-14T13:27:21.519000",
+      "latest_spark_process_time": "2026-06-14T13:27:30.009000",
+      "avg_ingest_latency_seconds": 9.0,
+      "event_time_lag_seconds": 1160055.670379,
+      "ingest_time_freshness_seconds": 1122925.151379
+    },
+    "prediction": {
+      "latest_event_time": "2024-05-25T02:58:00",
+      "latest_prediction_time": "2026-06-26T10:13:15.688000",
+      "model_name": "gradient_boosted_trees",
+      "predicted_direction": 0,
+      "confidence": 0.5804433111477083,
+      "prediction_freshness_seconds": 97770.98238
+    },
+    "alert": {
+      "latest_alert_time": "2026-06-27T12:57:48.262000",
+      "latest_severity": "medium",
+      "latest_confidence": 0.5507222975579191,
+      "latest_message": "AAPL predicted UP with 55.1% confidence using gradient_boosted_trees at price 190.0.",
+      "alert_freshness_seconds": 1498.408381
+    },
+    "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
+  },
+  "MSFT": {
+    "symbol": "MSFT",
+    "generated_at": "2026-06-27T13:22:46.883857Z",
+    "window_limit": 20,
+    "counts": {
+      "market_rows": 20,
+      "news_rows": 5,
+      "prediction_rows": 20,
+      "alert_rows": 20
+    },
+    "market": {
+      "latest_event_time": "2024-05-25T02:59:00",
+      "latest_ingest_time": "2026-06-27T20:13:05.361000",
+      "latest_spark_process_time": "2026-06-27T20:13:13.863000",
+      "latest_source": "databento_historical_replay",
+      "latest_market_price": 430.13,
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 65960626.883871,
+      "ingest_time_freshness_seconds": -24618.477126,
+      "spark_process_freshness_seconds": -24626.979125
+    },
+    "news": {
+      "latest_event_time": "2026-06-14T01:38:30",
+      "latest_ingest_time": "2026-06-14T13:27:22.037000",
+      "latest_spark_process_time": "2026-06-14T13:27:30.009000",
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 1165456.883878,
+      "ingest_time_freshness_seconds": 1122924.846878
+    },
+    "prediction": {
+      "latest_event_time": "2024-05-25T02:58:00",
+      "latest_prediction_time": "2026-06-14T10:22:31.754000",
+      "model_name": "gradient_boosted_trees",
+      "predicted_direction": 1,
+      "confidence": 0.5490860644588484,
+      "prediction_freshness_seconds": 1134015.129879
+    },
+    "alert": {
+      "latest_alert_time": "2026-06-27T12:57:48.275000",
+      "latest_severity": "medium",
+      "latest_confidence": 0.5838142235426734,
+      "latest_message": "MSFT predicted UP with 58.4% confidence using gradient_boosted_trees at price 429.74.",
+      "alert_freshness_seconds": 1498.608881
+    },
+    "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
+  },
+  "NVDA": {
+    "symbol": "NVDA",
+    "generated_at": "2026-06-27T13:22:47.096703Z",
+    "window_limit": 20,
+    "counts": {
+      "market_rows": 20,
+      "news_rows": 5,
+      "prediction_rows": 20,
+      "alert_rows": 20
+    },
+    "market": {
+      "latest_event_time": "2024-05-25T02:59:00",
+      "latest_ingest_time": "2026-06-27T20:13:05.360000",
+      "latest_spark_process_time": "2026-06-27T20:13:13.863000",
+      "latest_source": "databento_historical_replay",
+      "latest_market_price": 1064.63,
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 65960627.09672,
+      "ingest_time_freshness_seconds": -24618.263276,
+      "spark_process_freshness_seconds": -24626.766275
+    },
+    "news": {
+      "latest_event_time": "2026-06-14T12:20:00",
+      "latest_ingest_time": "2026-06-14T13:27:22.351000",
+      "latest_spark_process_time": "2026-06-14T13:27:30.009000",
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 1126967.096728,
+      "ingest_time_freshness_seconds": 1122924.745729
+    },
+    "prediction": {
+      "latest_event_time": "2024-05-25T02:58:00",
+      "latest_prediction_time": "2026-06-14T10:22:31.754000",
+      "model_name": "gradient_boosted_trees",
+      "predicted_direction": 0,
+      "confidence": 0.6110725453498178,
+      "prediction_freshness_seconds": 1134015.34273
+    },
+    "alert": {
+      "latest_alert_time": "2026-06-27T12:57:48.296000",
+      "latest_severity": "medium",
+      "latest_confidence": 0.5906431761036013,
+      "latest_message": "NVDA predicted UP with 59.1% confidence using logistic_regression at price 1059.69.",
+      "alert_freshness_seconds": 1498.800731
+    },
+    "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
+  },
+  "AMZN": {
+    "symbol": "AMZN",
+    "generated_at": "2026-06-27T13:22:47.309424Z",
+    "window_limit": 20,
+    "counts": {
+      "market_rows": 20,
+      "news_rows": 0,
+      "prediction_rows": 20,
+      "alert_rows": 6
+    },
+    "market": {
+      "latest_event_time": "2024-05-25T02:59:00",
+      "latest_ingest_time": "2026-06-27T20:13:05.361000",
+      "latest_spark_process_time": "2026-06-27T20:13:13.863000",
+      "latest_source": "databento_historical_replay",
+      "latest_market_price": 180.74,
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 65960627.30944,
+      "ingest_time_freshness_seconds": -24618.051556,
+      "spark_process_freshness_seconds": -24626.553555
+    },
+    "news": {
+      "latest_event_time": null,
+      "latest_ingest_time": null,
+      "latest_spark_process_time": null,
+      "avg_ingest_latency_seconds": null,
+      "event_time_lag_seconds": null,
+      "ingest_time_freshness_seconds": null
+    },
+    "prediction": {
+      "latest_event_time": "2024-05-25T02:58:00",
+      "latest_prediction_time": "2026-06-26T10:13:15.688000",
+      "model_name": "gradient_boosted_trees",
+      "predicted_direction": 1,
+      "confidence": 0.5066066865001302,
+      "prediction_freshness_seconds": 97771.621447
+    },
+    "alert": {
+      "latest_alert_time": "2026-06-27T12:57:48.314000",
+      "latest_severity": "medium",
+      "latest_confidence": 0.5737290469155872,
+      "latest_message": "AMZN predicted DOWN with 57.4% confidence using gradient_boosted_trees at price 180.5.",
+      "alert_freshness_seconds": 1498.995448
+    },
+    "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
+  },
+  "TSLA": {
+    "symbol": "TSLA",
+    "generated_at": "2026-06-27T13:22:47.521103Z",
+    "window_limit": 20,
+    "counts": {
+      "market_rows": 20,
+      "news_rows": 0,
+      "prediction_rows": 20,
+      "alert_rows": 2
+    },
+    "market": {
+      "latest_event_time": "2024-05-25T02:59:00",
+      "latest_ingest_time": "2026-06-27T20:13:05.361000",
+      "latest_spark_process_time": "2026-06-27T20:13:13.863000",
+      "latest_source": "databento_historical_replay",
+      "latest_market_price": 179.34,
+      "avg_ingest_latency_seconds": 8.0,
+      "event_time_lag_seconds": 65960627.521117,
+      "ingest_time_freshness_seconds": -24617.839869,
+      "spark_process_freshness_seconds": -24626.341867
+    },
+    "news": {
+      "latest_event_time": null,
+      "latest_ingest_time": null,
+      "latest_spark_process_time": null,
+      "avg_ingest_latency_seconds": null,
+      "event_time_lag_seconds": null,
+      "ingest_time_freshness_seconds": null
+    },
+    "prediction": {
+      "latest_event_time": "2024-05-25T02:49:00",
+      "latest_prediction_time": "2026-06-27T12:57:31.668000",
+      "model_name": "logistic_regression",
+      "predicted_direction": 1,
+      "confidence": 0.5088114417237561,
+      "prediction_freshness_seconds": 1515.853135
+    },
+    "alert": {
+      "latest_alert_time": "2026-06-27T12:57:48.318000",
+      "latest_severity": "medium",
+      "latest_confidence": 0.5511158986370954,
+      "latest_message": "TSLA predicted DOWN with 55.1% confidence using logistic_regression at price 179.8.",
+      "alert_freshness_seconds": 1499.203136
+    },
+    "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
+  },
+  "BTC-USD": {
+    "symbol": "BTC-USD",
+    "generated_at": "2026-06-27T13:22:47.734475Z",
+    "window_limit": 20,
+    "counts": {
+      "market_rows": 20,
+      "news_rows": 0,
+      "prediction_rows": 0,
+      "alert_rows": 0
+    },
+    "market": {
+      "latest_event_time": "2026-06-27T20:14:54",
+      "latest_ingest_time": "2026-06-27T20:14:55.265000",
+      "latest_spark_process_time": "2026-06-27T20:15:00.031000",
+      "latest_source": "yfinance_websocket",
+      "latest_market_price": 60308.54,
+      "avg_ingest_latency_seconds": 6.15,
+      "event_time_lag_seconds": -24726.265494,
+      "ingest_time_freshness_seconds": -24727.530482,
+      "spark_process_freshness_seconds": -24732.296481
+    },
+    "news": {
+      "latest_event_time": null,
+      "latest_ingest_time": null,
+      "latest_spark_process_time": null,
+      "avg_ingest_latency_seconds": null,
+      "event_time_lag_seconds": null,
+      "ingest_time_freshness_seconds": null
+    },
+    "prediction": {
+      "latest_event_time": null,
+      "latest_prediction_time": null,
+      "model_name": null,
+      "predicted_direction": null,
+      "confidence": null,
+      "prediction_freshness_seconds": null
+    },
+    "alert": {
+      "latest_alert_time": null,
+      "latest_severity": null,
+      "latest_confidence": null,
+      "latest_message": null,
+      "alert_freshness_seconds": null
+    },
+    "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
+  }
+}
