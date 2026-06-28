@@ -1,6 +1,6 @@
 {
   "status_code": 200,
-  "latency_ms": 8.781156997429207,
+  "latency_ms": 10.080183000127363,
   "error": null,
   "available_metrics": [
     "market_intel_api_requests_total",
