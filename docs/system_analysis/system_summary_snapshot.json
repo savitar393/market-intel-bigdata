@@ -1,7 +1,7 @@
 {
   "AAPL": {
     "symbol": "AAPL",
-    "generated_at": "2026-06-27T14:56:28.713410Z",
+    "generated_at": "2026-06-28T10:58:45.054102Z",
     "window_limit": 20,
     "counts": {
       "market_rows": 20,
@@ -16,17 +16,17 @@
       "latest_source": "databento_historical_replay",
       "latest_market_price": 190.0,
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 65966248.713465,
-      "ingest_time_freshness_seconds": -18996.646528,
-      "spark_process_freshness_seconds": -19005.149526
+      "event_time_lag_seconds": 66038385.054123,
+      "ingest_time_freshness_seconds": 53139.694129,
+      "spark_process_freshness_seconds": 53131.191131
     },
     "news": {
       "latest_event_time": "2026-06-14T03:08:31",
       "latest_ingest_time": "2026-06-14T13:27:21.519000",
       "latest_spark_process_time": "2026-06-14T13:27:30.009000",
       "avg_ingest_latency_seconds": 9.0,
-      "event_time_lag_seconds": 1165677.713504,
-      "ingest_time_freshness_seconds": 1128547.194506
+      "event_time_lag_seconds": 1237814.054134,
+      "ingest_time_freshness_seconds": 1200683.535136
     },
     "prediction": {
       "latest_event_time": "2024-05-25T02:49:00",
@@ -34,7 +34,7 @@
       "model_name": "logistic_regression",
       "predicted_direction": 1,
       "confidence": 0.4990193469505929,
-      "prediction_freshness_seconds": 3050.221507
+      "prediction_freshness_seconds": 75186.562137
     },
     "alert": {
       "latest_alert_time": null,
@@ -47,7 +47,7 @@
   },
   "MSFT": {
     "symbol": "MSFT",
-    "generated_at": "2026-06-27T14:56:28.931971Z",
+    "generated_at": "2026-06-28T10:58:45.264304Z",
     "window_limit": 20,
     "counts": {
       "market_rows": 20,
@@ -62,17 +62,17 @@
       "latest_source": "databento_historical_replay",
       "latest_market_price": 430.13,
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 65966248.932022,
-      "ingest_time_freshness_seconds": -18996.428971,
-      "spark_process_freshness_seconds": -19004.930969
+      "event_time_lag_seconds": 66038385.264338,
+      "ingest_time_freshness_seconds": 53139.903344,
+      "spark_process_freshness_seconds": 53131.401346
     },
     "news": {
       "latest_event_time": "2026-06-14T01:38:30",
       "latest_ingest_time": "2026-06-14T13:27:22.037000",
       "latest_spark_process_time": "2026-06-14T13:27:30.009000",
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 1171078.932037,
-      "ingest_time_freshness_seconds": 1128546.895038
+      "event_time_lag_seconds": 1243215.26435,
+      "ingest_time_freshness_seconds": 1200683.227352
     },
     "prediction": {
       "latest_event_time": "2024-05-25T02:49:00",
@@ -80,7 +80,7 @@
       "model_name": "logistic_regression",
       "predicted_direction": 1,
       "confidence": 0.533832003059714,
-      "prediction_freshness_seconds": 3050.440041
+      "prediction_freshness_seconds": 75186.772354
     },
     "alert": {
       "latest_alert_time": null,
@@ -93,7 +93,7 @@
   },
   "NVDA": {
     "symbol": "NVDA",
-    "generated_at": "2026-06-27T14:56:29.149238Z",
+    "generated_at": "2026-06-28T10:58:45.476932Z",
     "window_limit": 20,
     "counts": {
       "market_rows": 20,
@@ -108,17 +108,17 @@
       "latest_source": "databento_historical_replay",
       "latest_market_price": 1064.63,
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 65966249.149254,
-      "ingest_time_freshness_seconds": -18996.210742,
-      "spark_process_freshness_seconds": -19004.713741
+      "event_time_lag_seconds": 66038385.476951,
+      "ingest_time_freshness_seconds": 53140.116957,
+      "spark_process_freshness_seconds": 53131.613959
     },
     "news": {
       "latest_event_time": "2026-06-14T12:20:00",
       "latest_ingest_time": "2026-06-14T13:27:22.351000",
       "latest_spark_process_time": "2026-06-14T13:27:30.009000",
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 1132589.149262,
-      "ingest_time_freshness_seconds": 1128546.798263
+      "event_time_lag_seconds": 1204725.476962,
+      "ingest_time_freshness_seconds": 1200683.125964
     },
     "prediction": {
       "latest_event_time": "2024-05-25T02:49:00",
@@ -126,20 +126,20 @@
       "model_name": "logistic_regression",
       "predicted_direction": 1,
       "confidence": 0.5710933754711087,
-      "prediction_freshness_seconds": 3050.657264
+      "prediction_freshness_seconds": 75186.984965
     },
     "alert": {
       "latest_alert_time": "2026-06-27T14:06:05.851000",
       "latest_severity": "medium",
       "latest_confidence": 0.5550550382011723,
       "latest_message": "NVDA predicted UP with 55.5% confidence using logistic_regression at price 1059.83.",
-      "alert_freshness_seconds": 3023.298265
+      "alert_freshness_seconds": 75159.625967
     },
     "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
   },
   "AMZN": {
     "symbol": "AMZN",
-    "generated_at": "2026-06-27T14:56:29.372070Z",
+    "generated_at": "2026-06-28T10:58:45.687297Z",
     "window_limit": 20,
     "counts": {
       "market_rows": 20,
@@ -154,9 +154,9 @@
       "latest_source": "databento_historical_replay",
       "latest_market_price": 180.74,
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 65966249.372108,
-      "ingest_time_freshness_seconds": -18995.988885,
-      "spark_process_freshness_seconds": -19004.490883
+      "event_time_lag_seconds": 66038385.687319,
+      "ingest_time_freshness_seconds": 53140.326336,
+      "spark_process_freshness_seconds": 53131.824338
     },
     "news": {
       "latest_event_time": null,
@@ -172,7 +172,7 @@
       "model_name": "logistic_regression",
       "predicted_direction": 1,
       "confidence": 0.504302495075118,
-      "prediction_freshness_seconds": 3050.880122
+      "prediction_freshness_seconds": 75187.195342
     },
     "alert": {
       "latest_alert_time": null,
@@ -185,7 +185,7 @@
   },
   "TSLA": {
     "symbol": "TSLA",
-    "generated_at": "2026-06-27T14:56:29.588280Z",
+    "generated_at": "2026-06-28T10:58:45.897934Z",
     "window_limit": 20,
     "counts": {
       "market_rows": 20,
@@ -200,9 +200,9 @@
       "latest_source": "databento_historical_replay",
       "latest_market_price": 179.34,
       "avg_ingest_latency_seconds": 8.0,
-      "event_time_lag_seconds": 65966249.588299,
-      "ingest_time_freshness_seconds": -18995.772697,
-      "spark_process_freshness_seconds": -19004.274696
+      "event_time_lag_seconds": 66038385.897958,
+      "ingest_time_freshness_seconds": 53140.536966,
+      "spark_process_freshness_seconds": 53132.034969
     },
     "news": {
       "latest_event_time": null,
@@ -218,20 +218,20 @@
       "model_name": "logistic_regression",
       "predicted_direction": 1,
       "confidence": 0.5088114417235554,
-      "prediction_freshness_seconds": 3051.096307
+      "prediction_freshness_seconds": 75187.405974
     },
     "alert": {
       "latest_alert_time": "2026-06-27T14:06:05.857000",
       "latest_severity": "medium",
       "latest_confidence": 0.5511158986371468,
       "latest_message": "TSLA predicted DOWN with 55.1% confidence using logistic_regression at price 179.8.",
-      "alert_freshness_seconds": 3023.731308
+      "alert_freshness_seconds": 75160.040978
     },
     "note": "For historical replay data, event_time_lag_seconds can be large because the source market event is historical. Ingest and Spark freshness are better indicators of pipeline freshness during replay."
   },
   "BTC-USD": {
     "symbol": "BTC-USD",
-    "generated_at": "2026-06-27T14:56:29.803088Z",
+    "generated_at": "2026-06-28T10:58:46.107800Z",
     "window_limit": 20,
     "counts": {
       "market_rows": 20,
@@ -240,15 +240,15 @@
       "alert_rows": 0
     },
     "market": {
-      "latest_event_time": "2026-06-27T21:32:47.366000",
-      "latest_ingest_time": "2026-06-27T21:32:47.490000",
-      "latest_spark_process_time": "2026-06-27T21:32:50.010000",
-      "latest_source": "finnhub_websocket",
-      "latest_market_price": 60624.66,
-      "avg_ingest_latency_seconds": 4.65,
-      "event_time_lag_seconds": -23777.562891,
-      "ingest_time_freshness_seconds": -23777.686887,
-      "spark_process_freshness_seconds": -23780.206887
+      "latest_event_time": "2026-06-27T22:42:01",
+      "latest_ingest_time": "2026-06-27T22:42:06.197000",
+      "latest_spark_process_time": "2026-06-27T22:42:10.006000",
+      "latest_source": "yfinance_websocket",
+      "latest_market_price": 60701.22,
+      "avg_ingest_latency_seconds": 5.25,
+      "event_time_lag_seconds": 44205.107823,
+      "ingest_time_freshness_seconds": 44199.91083,
+      "spark_process_freshness_seconds": 44196.101831
     },
     "news": {
       "latest_event_time": null,

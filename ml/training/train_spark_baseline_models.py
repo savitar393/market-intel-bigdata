@@ -65,7 +65,7 @@ FEATURE_COLUMNS = [
     "negative_news_count",
 ]
 
-LABEL_COLUMN = "target_direction"
+LABEL_COLUMN = os.getenv("CLASSIFICATION_LABEL_COLUMN", "target_direction")
 
 
 def safe_metric(evaluator, predictions):

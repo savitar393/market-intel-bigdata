@@ -130,6 +130,32 @@ class FeatureState:
             }
         )
 
+    def update_news(self, symbol, event):
+        symbol = str(symbol).upper()
+
+        state = self.news_state[symbol]
+
+        try:
+            score = float(event.get("simple_sentiment_score") or 0.0)
+        except Exception:
+            score = 0.0
+
+        label = str(event.get("simple_sentiment_label") or "").lower()
+
+        previous_count = float(state["news_count"])
+        new_count = previous_count + 1.0
+
+        state["avg_sentiment_score"] = (
+            (float(state["avg_sentiment_score"]) * previous_count) + score
+        ) / new_count
+
+        state["news_count"] = new_count
+
+        if label == "positive" or score > 0:
+            state["positive_news_count"] += 1.0
+        elif label == "negative" or score < 0:
+            state["negative_news_count"] += 1.0
+
     def add_bar(self, bar):
         self.bars[bar.symbol].append(bar)
 
@@ -270,7 +296,7 @@ class CassandraWriter:
         )
 
 
-def build_consumer(bootstrap_servers, topic, group_id):
+def build_consumer(bootstrap_servers, topics, group_id):
     consumer = Consumer(
         {
             "bootstrap.servers": bootstrap_servers,
@@ -279,7 +305,7 @@ def build_consumer(bootstrap_servers, topic, group_id):
             "enable.auto.commit": True,
         }
     )
-    consumer.subscribe([topic])
+    consumer.subscribe(topics)
     return consumer
 
 
@@ -319,8 +345,12 @@ def main():
         default=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
     )
     parser.add_argument(
-        "--topic",
+        "--market-topic",
         default=os.getenv("KAFKA_MARKET_TOPIC", "raw_market_ticks"),
+    )
+    parser.add_argument(
+        "--news-topic",
+        default=os.getenv("KAFKA_NEWS_TOPIC", "raw_news_events"),
     )
     parser.add_argument(
         "--group-id",
@@ -358,13 +388,14 @@ def main():
         keyspace=cassandra_keyspace,
     )
 
-    consumer = build_consumer(args.bootstrap_servers, args.topic, args.group_id)
+    consumer = build_consumer(args.bootstrap_servers, [args.market_topic, args.news_topic], args.group_id)
 
     current_bars = {}
     prediction_count = 0
 
     print("Online market inference started")
-    print(f"Kafka topic: {args.topic}")
+    print(f"Kafka market topic: {args.market_topic}")
+    print(f"Kafka news topic: {args.news_topic}")
     print(f"Symbols: {sorted(symbols)}")
     print(f"Model: {model.model_name}")
     print(f"Threshold: {model.threshold}")
@@ -390,6 +421,16 @@ def main():
             symbol = str(event.get("symbol", "")).upper()
 
             if symbol not in symbols:
+                continue
+
+            if event_type == "news_event":
+                state.update_news(symbol, event)
+                current_news = state.news_state[symbol]
+                print(
+                    f"NEWS {symbol} count={current_news['news_count']:.0f} "
+                    f"avg_sentiment={current_news['avg_sentiment_score']:.4f} "
+                    f"source={event.get('source')}"
+                )
                 continue
 
             if event_type not in {"market_tick", "market_bar"}:

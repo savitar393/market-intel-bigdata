@@ -108,11 +108,11 @@ replay-databento:
 
 .PHONY: produce-yfinance
 produce-yfinance:
-> python services/producers/yfinance_live_producer.py --symbols AAPL,MSFT,NVDA,AMZN,BTC-USD --max-messages 20
+> python services/producers/yfinance_live_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA,BTC-USD --max-messages 20
 
 .PHONY: produce-news
 produce-news:
-> python services/producers/finnhub_news_producer.py --symbols AAPL,MSFT,NVDA --max-events-per-symbol 5 --once
+> python services/producers/yahoo_rss_news_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --max-events-per-symbol 5
 
 .PHONY: build-features
 build-features:
@@ -139,11 +139,11 @@ load-predictions:
 
 .PHONY: generate-alerts
 generate-alerts:
-> python services/alerts/generate_prediction_alerts.py --symbols AAPL,MSFT,NVDA --threshold 0.55
+> python services/alerts/generate_prediction_alerts.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --threshold 0.55
 
 .PHONY: telegram-dry-run
 telegram-dry-run:
-> python services/notifications/send_telegram_alerts.py --symbols AAPL,MSFT,NVDA --limit 3 --dry-run
+> python services/notifications/send_telegram_alerts.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --limit 3 --dry-run
 
 .PHONY: mlflow-up
 mlflow-up:
@@ -239,4 +239,4 @@ gdelt-news:
 
 .PHONY: yahoo-news
 yahoo-news:
-	python services/producers/yahoo_rss_news_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --max-events-per-symbol 5
+> python services/producers/yahoo_rss_news_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --max-events-per-symbol 5

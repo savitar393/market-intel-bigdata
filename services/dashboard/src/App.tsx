@@ -107,7 +107,7 @@ type SystemSummary = {
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 const WS_BASE = import.meta.env.VITE_WS_BASE ?? "ws://localhost:8000";
 
-const SYMBOLS = ["AAPL", "MSFT", "NVDA", "AMZN", "BTC-USD"];
+const SYMBOLS = ["AAPL", "MSFT", "NVDA", "AMZN", "TSLA", "BTC-USD"];
 
 const FINAL_MODEL_NOTE =
   "Academic demo only. Final classifier: Logistic Regression, 1-minute horizon, tuned threshold probability_up ≥ 0.47.";
