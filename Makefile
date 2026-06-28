@@ -187,7 +187,7 @@ prefect-validate-sources:
 
 .PHONY: prefect-ml-refresh
 prefect-ml-refresh:
-> python orchestration/ml_refresh_flow.py
+> MODEL_SYMBOLS=AAPL,MSFT,NVDA,AMZN,TSLA PREDICTION_ALERT_THRESHOLD=0.47 python orchestration/ml_refresh_flow.py
 
 .PHONY: prefect-ui
 prefect-ui:
@@ -240,3 +240,12 @@ gdelt-news:
 .PHONY: yahoo-news
 yahoo-news:
 > python services/producers/yahoo_rss_news_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --max-events-per-symbol 5
+
+
+.PHONY: prefect-ml-serve
+prefect-ml-serve:
+> PREFECT_ML_REFRESH_CRON="0 */6 * * *" python orchestration/serve_ml_refresh_flow.py
+
+.PHONY: prefect-ml-serve-fast
+prefect-ml-serve-fast:
+> PREFECT_ML_REFRESH_CRON="*/30 * * * *" python orchestration/serve_ml_refresh_flow.py
