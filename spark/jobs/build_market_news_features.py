@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from pyspark.sql import SparkSession, Window
 from pyspark.sql.functions import (
@@ -22,7 +23,24 @@ from pyspark.sql.functions import (
 
 MARKET_PATH = os.getenv("MARKET_PARQUET_PATH", "data/processed/market_ticks")
 NEWS_PATH = os.getenv("NEWS_PARQUET_PATH", "data/processed/news_events")
+DAILY_FEATURE_PATH = os.getenv("DAILY_FEATURE_PATH", "data/features/daily_stock_features")
 OUTPUT_PATH = os.getenv("FEATURE_OUTPUT_PATH", "data/features/model_training_dataset")
+
+DAILY_CONTEXT_COLUMNS = [
+    "open_close",
+    "low_high",
+    "daily_return_1",
+    "daily_return_5",
+    "daily_return_20",
+    "ma_20_ratio",
+    "ma_50_ratio",
+    "ma_100_ratio",
+    "ma_200_ratio",
+    "daily_volatility_20",
+    "volume_surprise_20",
+    "dividends",
+    "stock_splits",
+]
 
 
 def main():
@@ -103,6 +121,36 @@ def main():
             }
         )
     )
+
+    if Path(DAILY_FEATURE_PATH).exists():
+        print("Reading daily context features:", DAILY_FEATURE_PATH)
+
+        daily_context = (
+            spark.read.parquet(DAILY_FEATURE_PATH)
+            .select(
+                col("symbol").alias("daily_symbol"),
+                col("event_date").alias("daily_event_date"),
+                *[col(c) for c in DAILY_CONTEXT_COLUMNS],
+            )
+        )
+
+        joined = (
+            joined
+            .join(
+                daily_context,
+                (joined.symbol == daily_context.daily_symbol)
+                & (joined.event_date == daily_context.daily_event_date),
+                "left",
+            )
+            .drop("daily_symbol", "daily_event_date")
+        )
+    else:
+        print(f"Daily context path not found: {DAILY_FEATURE_PATH}. Filling daily context with zeros.")
+
+        for c in DAILY_CONTEXT_COLUMNS:
+            joined = joined.withColumn(c, lit(0.0))
+
+    joined = joined.fillna({c: 0.0 for c in DAILY_CONTEXT_COLUMNS})
 
     w = Window.partitionBy("symbol").orderBy("event_minute")
 
@@ -229,6 +277,20 @@ def main():
             "avg_sentiment_score",
             "positive_news_count",
             "negative_news_count",
+
+            "open_close",
+            "low_high",
+            "daily_return_1",
+            "daily_return_5",
+            "daily_return_20",
+            "ma_20_ratio",
+            "ma_50_ratio",
+            "ma_100_ratio",
+            "ma_200_ratio",
+            "daily_volatility_20",
+            "volume_surprise_20",
+            "dividends",
+            "stock_splits",
 
             "target_next_return",
             "target_direction",

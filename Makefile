@@ -249,3 +249,16 @@ prefect-ml-serve:
 .PHONY: prefect-ml-serve-fast
 prefect-ml-serve-fast:
 > PREFECT_ML_REFRESH_CRON="*/30 * * * *" python orchestration/serve_ml_refresh_flow.py
+
+.PHONY: daily-backfill
+daily-backfill:
+> python services/producers/yfinance_daily_backfill_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --start 2010-01-01
+
+.PHONY: build-daily-features
+build-daily-features:
+> rm -rf data/features/daily_stock_features
+> spark-submit spark/jobs/build_daily_stock_features.py
+
+.PHONY: build-all-features
+build-all-features: daily-backfill build-daily-features build-features
+> @echo "Daily context + market-news feature build complete."
