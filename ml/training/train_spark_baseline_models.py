@@ -63,6 +63,19 @@ FEATURE_COLUMNS = [
     "avg_sentiment_score",
     "positive_news_count",
     "negative_news_count",
+    "open_close",
+    "low_high",
+    "daily_return_1",
+    "daily_return_5",
+    "daily_return_20",
+    "ma_20_ratio",
+    "ma_50_ratio",
+    "ma_100_ratio",
+    "ma_200_ratio",
+    "daily_volatility_20",
+    "volume_surprise_20",
+    "dividends",
+    "stock_splits",
 ]
 
 LABEL_COLUMN = os.getenv("CLASSIFICATION_LABEL_COLUMN", "target_direction")

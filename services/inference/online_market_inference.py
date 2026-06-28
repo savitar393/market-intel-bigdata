@@ -15,6 +15,23 @@ from dotenv import load_dotenv
 
 
 DEFAULT_MODEL_PATH = "data/model_artifacts/online_serving/logistic_regression_online.json"
+DEFAULT_DAILY_CONTEXT_PATH = "data/features/daily_stock_context_latest.json"
+
+DAILY_CONTEXT_COLUMNS = [
+    "open_close",
+    "low_high",
+    "daily_return_1",
+    "daily_return_5",
+    "daily_return_20",
+    "ma_20_ratio",
+    "ma_50_ratio",
+    "ma_100_ratio",
+    "ma_200_ratio",
+    "daily_volatility_20",
+    "volume_surprise_20",
+    "dividends",
+    "stock_splits",
+]
 
 
 def parse_ts(value):
@@ -118,9 +135,40 @@ class OnlineLogisticModel:
         return predicted_direction, probability_down, probability_up
 
 
+def load_daily_context(path):
+    daily_path = Path(path)
+
+    zero_context = {col: 0.0 for col in DAILY_CONTEXT_COLUMNS}
+
+    if not daily_path.exists():
+        print(f"Daily context file not found: {daily_path}. Using zeros.")
+        return defaultdict(lambda: dict(zero_context))
+
+    payload = json.loads(daily_path.read_text(encoding="utf-8"))
+
+    context = defaultdict(lambda: dict(zero_context))
+
+    for symbol, values in payload.items():
+        row = dict(zero_context)
+
+        for col in DAILY_CONTEXT_COLUMNS:
+            try:
+                row[col] = float(values.get(col) or 0.0)
+            except Exception:
+                row[col] = 0.0
+
+        context[str(symbol).upper()] = row
+
+    print(f"Loaded daily context for symbols: {sorted(context.keys())}")
+    return context
+
+
 class FeatureState:
-    def __init__(self, max_bars=120):
+    def __init__(self, max_bars=120, daily_context=None):
         self.bars = defaultdict(lambda: deque(maxlen=max_bars))
+        self.daily_context = daily_context or defaultdict(
+            lambda: {col: 0.0 for col in DAILY_CONTEXT_COLUMNS}
+        )
         self.news_state = defaultdict(
             lambda: {
                 "news_count": 0.0,
@@ -205,6 +253,7 @@ class FeatureState:
             return bar.volume / avg_volume
 
         news = self.news_state[bar.symbol]
+        daily = self.daily_context[bar.symbol]
 
         features = {
             "market_price": bar.close,
@@ -239,6 +288,20 @@ class FeatureState:
             "avg_sentiment_score": news["avg_sentiment_score"],
             "positive_news_count": news["positive_news_count"],
             "negative_news_count": news["negative_news_count"],
+
+            "open_close": daily.get("open_close", 0.0),
+            "low_high": daily.get("low_high", 0.0),
+            "daily_return_1": daily.get("daily_return_1", 0.0),
+            "daily_return_5": daily.get("daily_return_5", 0.0),
+            "daily_return_20": daily.get("daily_return_20", 0.0),
+            "ma_20_ratio": daily.get("ma_20_ratio", 0.0),
+            "ma_50_ratio": daily.get("ma_50_ratio", 0.0),
+            "ma_100_ratio": daily.get("ma_100_ratio", 0.0),
+            "ma_200_ratio": daily.get("ma_200_ratio", 0.0),
+            "daily_volatility_20": daily.get("daily_volatility_20", 0.0),
+            "volume_surprise_20": daily.get("volume_surprise_20", 0.0),
+            "dividends": daily.get("dividends", 0.0),
+            "stock_splits": daily.get("stock_splits", 0.0),
         }
 
         return features
@@ -341,6 +404,10 @@ def main():
         default=os.getenv("ONLINE_MODEL_PATH", DEFAULT_MODEL_PATH),
     )
     parser.add_argument(
+        "--daily-context-path",
+        default=os.getenv("DAILY_LATEST_CONTEXT_PATH", DEFAULT_DAILY_CONTEXT_PATH),
+    )
+    parser.add_argument(
         "--bootstrap-servers",
         default=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
     )
@@ -372,7 +439,8 @@ def main():
     symbols = {s.strip().upper() for s in args.symbols.split(",") if s.strip()}
 
     model = OnlineLogisticModel(args.model_path)
-    state = FeatureState()
+    daily_context = load_daily_context(args.daily_context_path)
+    state = FeatureState(daily_context=daily_context)
 
     cassandra_hosts = [
         h.strip()
@@ -399,6 +467,7 @@ def main():
     print(f"Symbols: {sorted(symbols)}")
     print(f"Model: {model.model_name}")
     print(f"Threshold: {model.threshold}")
+    print(f"Daily context path: {args.daily_context_path}")
 
     try:
         while True:
