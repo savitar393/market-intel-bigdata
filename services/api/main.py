@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 from cassandra.cluster import Cluster
@@ -31,7 +31,7 @@ CASSANDRA_KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "market_intel")
 
 MONITOR_SYMBOLS = [
     s.strip().upper()
-    for s in os.getenv("MONITOR_SYMBOLS", "AAPL,MSFT,NVDA,BTC-USD").split(",")
+    for s in os.getenv("MONITOR_SYMBOLS", "AAPL,MSFT,NVDA,AMZN,TSLA,BTC-USD").split(",")
     if s.strip()
 ]
 METRICS_REFRESH_SECONDS = float(os.getenv("METRICS_REFRESH_SECONDS", "10"))
@@ -205,12 +205,17 @@ def seconds_since(value) -> float | None:
     if dt is None:
         return None
 
-    now = datetime.utcnow()
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    else:
+        dt = dt.astimezone(timezone.utc)
 
-    if dt.tzinfo is not None:
-        dt = dt.replace(tzinfo=None)
+    now = datetime.now(timezone.utc)
+    diff = (now - dt).total_seconds()
 
-    return (now - dt).total_seconds()
+    # Some replay/live-provider timestamps can be ahead because of timezone or provider clock differences.
+    # Clamp to zero so Grafana/system-analysis does not show negative freshness.
+    return max(diff, 0.0)
 
 
 def average_numeric(items: list[dict], key: str) -> float | None:
@@ -224,6 +229,28 @@ def average_numeric(items: list[dict], key: str) -> float | None:
         return None
 
     return sum(values) / len(values)
+
+def initialize_websocket_metrics():
+    for endpoint in ["market", "news", "live"]:
+        for symbol in MONITOR_SYMBOLS:
+            WEBSOCKET_ACTIVE_CONNECTIONS.labels(
+                endpoint=endpoint,
+                symbol=symbol,
+            ).set(0)
+
+
+def websocket_inc(endpoint: str, symbol: str):
+    WEBSOCKET_ACTIVE_CONNECTIONS.labels(
+        endpoint=endpoint,
+        symbol=symbol,
+    ).inc()
+
+
+def websocket_dec(endpoint: str, symbol: str):
+    WEBSOCKET_ACTIVE_CONNECTIONS.labels(
+        endpoint=endpoint,
+        symbol=symbol,
+    ).dec()
 
 def update_symbol_prometheus_metrics(symbol: str):
     market = fetch_market_rows(symbol, 20)
@@ -598,14 +625,10 @@ async def ws_market(
     symbol: str,
     interval_seconds: float = Query(default=2.0, ge=0.5, le=10.0),
 ):
-    await websocket.accept()
-
-    WEBSOCKET_ACTIVE_CONNECTIONS.labels(
-        endpoint="market",
-        symbol=normalized_symbol,
-    ).inc()
-
     normalized_symbol = symbol.upper()
+
+    await websocket.accept()
+    websocket_inc("market", normalized_symbol)
 
     try:
         while True:
@@ -613,18 +636,20 @@ async def ws_market(
                 "type": "market_snapshot",
                 "symbol": normalized_symbol,
                 "items": fetch_market_rows(normalized_symbol, 10),
-                "generated_at": datetime.utcnow().isoformat() + "Z",
+                "generated_at": datetime.now(timezone.utc).isoformat(),
             }
 
             await websocket.send_json(payload)
             await asyncio.sleep(interval_seconds)
 
     except WebSocketDisconnect:
-        WEBSOCKET_ACTIVE_CONNECTIONS.labels(
-            endpoint="market",
-            symbol=normalized_symbol,
-        ).dec()
         print(f"Market WebSocket disconnected: {normalized_symbol}")
+
+    except Exception as exc:
+        print(f"Market WebSocket error for {normalized_symbol}: {exc}")
+
+    finally:
+        websocket_dec("market", normalized_symbol)
 
 
 @app.websocket("/ws/news/{symbol}")
@@ -633,9 +658,10 @@ async def ws_news(
     symbol: str,
     interval_seconds: float = Query(default=5.0, ge=1.0, le=30.0),
 ):
-    await websocket.accept()
-
     normalized_symbol = symbol.upper()
+
+    await websocket.accept()
+    websocket_inc("news", normalized_symbol)
 
     try:
         while True:
@@ -643,7 +669,7 @@ async def ws_news(
                 "type": "news_snapshot",
                 "symbol": normalized_symbol,
                 "items": fetch_news_rows(normalized_symbol, 10),
-                "generated_at": datetime.utcnow().isoformat() + "Z",
+                "generated_at": datetime.now(timezone.utc).isoformat(),
             }
 
             await websocket.send_json(payload)
@@ -652,6 +678,12 @@ async def ws_news(
     except WebSocketDisconnect:
         print(f"News WebSocket disconnected: {normalized_symbol}")
 
+    except Exception as exc:
+        print(f"News WebSocket error for {normalized_symbol}: {exc}")
+
+    finally:
+        websocket_dec("news", normalized_symbol)
+
 
 @app.websocket("/ws/live/{symbol}")
 async def ws_live(
@@ -659,9 +691,10 @@ async def ws_live(
     symbol: str,
     interval_seconds: float = Query(default=2.0, ge=0.5, le=10.0),
 ):
-    await websocket.accept()
-
     normalized_symbol = symbol.upper()
+
+    await websocket.accept()
+    websocket_inc("live", normalized_symbol)
 
     try:
         while True:
@@ -672,7 +705,7 @@ async def ws_live(
                 "news": fetch_news_rows(normalized_symbol, 5),
                 "predictions": fetch_prediction_rows(normalized_symbol, 10),
                 "alerts": fetch_alert_rows(normalized_symbol, 10),
-                "generated_at": datetime.utcnow().isoformat() + "Z",
+                "generated_at": datetime.now(timezone.utc).isoformat(),
             }
 
             await websocket.send_json(payload)
@@ -680,6 +713,12 @@ async def ws_live(
 
     except WebSocketDisconnect:
         print(f"Live WebSocket disconnected: {normalized_symbol}")
+
+    except Exception as exc:
+        print(f"Live WebSocket error for {normalized_symbol}: {exc}")
+
+    finally:
+        websocket_dec("live", normalized_symbol)
 
 
 async def refresh_prometheus_metrics_loop():
@@ -695,6 +734,7 @@ async def refresh_prometheus_metrics_loop():
 
 @app.on_event("startup")
 async def startup_event():
+    initialize_websocket_metrics()
     app.state.metrics_task = asyncio.create_task(refresh_prometheus_metrics_loop())
 
 @app.on_event("shutdown")
