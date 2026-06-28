@@ -232,3 +232,11 @@ hybrid-market:
 .PHONY: hybrid-market-test
 hybrid-market-test:
 > python services/producers/hybrid_market_producer.py --live-max-messages 20
+
+.PHONY: gdelt-news
+gdelt-news:
+> python services/producers/gdelt_news_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --timespan 7d --max-events-per-symbol 5
+
+.PHONY: yahoo-news
+yahoo-news:
+	python services/producers/yahoo_rss_news_producer.py --symbols AAPL,MSFT,NVDA,AMZN,TSLA --max-events-per-symbol 5

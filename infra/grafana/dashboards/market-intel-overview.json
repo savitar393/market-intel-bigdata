@@ -40,7 +40,7 @@
       "gridPos": {"x": 15, "y": 0, "w": 5, "h": 4},
       "targets": [
         {
-          "expr": "sum(market_intel_websocket_active_connections)",
+          "expr": "sum by (symbol) (market_intel_websocket_active_connections) or vector(0)",
           "legendFormat": "connections",
           "refId": "A"
         }
