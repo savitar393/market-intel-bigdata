@@ -1,5 +1,7 @@
 import asyncio
+import json
 import os
+from pathlib import Path
 from datetime import date, datetime, timezone
 from typing import Any
 
@@ -35,6 +37,20 @@ MONITOR_SYMBOLS = [
     if s.strip()
 ]
 METRICS_REFRESH_SECONDS = float(os.getenv("METRICS_REFRESH_SECONDS", "10"))
+
+CLASSIFICATION_METRICS_PATH = Path(
+    os.getenv(
+        "CLASSIFICATION_METRICS_PATH",
+        "data/model_artifacts/baseline_models/model_metrics.json",
+    )
+)
+
+DAILY_TREND_PATH = Path(
+    os.getenv(
+        "DAILY_TREND_PATH",
+        "data/features/daily_stock_trend.json",
+    )
+)
 
 HTTP_REQUESTS_TOTAL = Counter(
     "market_intel_api_requests_total",
@@ -174,6 +190,26 @@ def get_session():
 
     return session
 
+
+def read_json_file(path: Path, fallback):
+    if not path.exists():
+        return fallback
+
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"Failed to read JSON file {path}: {exc}")
+        return fallback
+
+
+def normalize_model_label(model_name: str) -> str:
+    return (
+        model_name
+        .replace("_", " ")
+        .replace("gradient boosted trees", "GBT")
+        .title()
+        .replace("Gbt", "GBT")
+    )
 
 def serialize_value(value: Any):
     if isinstance(value, (datetime, date)):
@@ -515,6 +551,101 @@ def latest_alerts(
         "count": len(items),
         "items": items,
     }
+
+@app.get("/api/v1/evaluation/classification-summary")
+def classification_summary():
+    metrics = read_json_file(CLASSIFICATION_METRICS_PATH, [])
+
+    items = []
+
+    for item in metrics:
+        if not isinstance(item, dict):
+            continue
+
+        items.append(
+            {
+                "model_name": item.get("model_name"),
+                "model_label": normalize_model_label(str(item.get("model_name", ""))),
+                "accuracy": item.get("accuracy"),
+                "f1": item.get("f1"),
+                "roc_auc": item.get("roc_auc"),
+                "weighted_precision": item.get("weighted_precision"),
+                "weighted_recall": item.get("weighted_recall"),
+                "train_rows": item.get("train_rows"),
+                "test_rows": item.get("test_rows"),
+                "label_column": item.get("label_column"),
+                "split_strategy": item.get("split_strategy"),
+            }
+        )
+
+    return {
+        "count": len(items),
+        "source": str(CLASSIFICATION_METRICS_PATH),
+        "items": items,
+    }
+
+
+@app.get("/api/v1/timeline/predictions/{symbol}")
+def prediction_timeline(
+    symbol: str,
+    limit: int = Query(default=100, ge=1, le=100),
+):
+    normalized_symbol = symbol.upper()
+    predictions = fetch_prediction_rows(normalized_symbol, int(limit))
+
+    items = []
+
+    for item in reversed(predictions):
+        direction = item.get("predicted_direction")
+        confidence = None
+
+        if direction == 1:
+            confidence = item.get("probability_up")
+        elif direction == 0:
+            confidence = item.get("probability_down")
+
+        items.append(
+            {
+                "event_time": item.get("event_time"),
+                "prediction_time": item.get("prediction_time"),
+                "market_price": item.get("market_price"),
+                "predicted_direction": direction,
+                "prediction_label": "UP" if direction == 1 else "DOWN" if direction == 0 else "-",
+                "probability_up": item.get("probability_up"),
+                "probability_down": item.get("probability_down"),
+                "confidence": confidence,
+                "model_name": item.get("model_name"),
+                "source": item.get("source"),
+            }
+        )
+
+    return {
+        "symbol": normalized_symbol,
+        "count": len(items),
+        "items": items,
+    }
+
+
+@app.get("/api/v1/daily-context/{symbol}")
+def daily_context(
+    symbol: str,
+    limit: int = Query(default=252, ge=1, le=300),
+):
+    normalized_symbol = symbol.upper()
+    payload = read_json_file(DAILY_TREND_PATH, {})
+
+    items = payload.get(normalized_symbol, [])
+
+    if not isinstance(items, list):
+        items = []
+
+    return {
+        "symbol": normalized_symbol,
+        "count": len(items[-limit:]),
+        "source": str(DAILY_TREND_PATH),
+        "items": items[-limit:],
+    }
+
 
 @app.get("/api/v1/dashboard/snapshot/{symbol}")
 def dashboard_snapshot(
