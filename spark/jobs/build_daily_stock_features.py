@@ -30,6 +30,11 @@ DAILY_LATEST_CONTEXT_PATH = os.getenv(
     "data/features/daily_stock_context_latest.json",
 )
 
+DAILY_TREND_OUTPUT_PATH = os.getenv(
+    "DAILY_TREND_OUTPUT_PATH",
+    "data/features/daily_stock_trend.json",
+)
+
 DAILY_CONTEXT_COLUMNS = [
     "open_close",
     "low_high",
@@ -244,7 +249,43 @@ def main():
     latest_path.parent.mkdir(parents=True, exist_ok=True)
     latest_path.write_text(json.dumps(latest_payload, indent=2), encoding="utf-8")
 
+    trend_window = Window.partitionBy("symbol").orderBy(col("event_date").desc())
+
+    trend_rows = (
+        features
+        .withColumn("_rn", row_number().over(trend_window))
+        .where(col("_rn") <= 300)
+        .select(
+            "symbol",
+            "event_date",
+            "close",
+            "ma_100",
+            "ma_200",
+            "ma_100_ratio",
+            "ma_200_ratio",
+        )
+        .orderBy("symbol", "event_date")
+        .collect()
+    )
+
+    trend_payload = {}
+
+    for row in trend_rows:
+        item = row.asDict()
+        symbol = item.pop("symbol")
+        item["event_date"] = str(item["event_date"])
+
+        for key in ["close", "ma_100", "ma_200", "ma_100_ratio", "ma_200_ratio"]:
+            item[key] = float(item[key]) if item.get(key) is not None else None
+
+        trend_payload.setdefault(symbol, []).append(item)
+
+    trend_path = Path(DAILY_TREND_OUTPUT_PATH)
+    trend_path.parent.mkdir(parents=True, exist_ok=True)
+    trend_path.write_text(json.dumps(trend_payload, indent=2), encoding="utf-8")
+
     print(f"Latest daily context written to: {latest_path}")
+    print(f"Daily trend chart data written to: {trend_path}")
     print(f"Daily feature row count: {features.count()}")
 
     spark.stop()

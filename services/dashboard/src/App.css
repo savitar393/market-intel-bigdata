@@ -438,3 +438,17 @@ th {
   border-color: rgba(251, 191, 36, 0.45);
   background: rgba(251, 191, 36, 0.08);
 }
+
+.chart {
+  width: 100%;
+  min-height: 320px;
+}
+
+.panel .muted {
+  margin-bottom: 1rem;
+}
+
+.recharts-wrapper {
+  font-size: 0.85rem;
+}
+
