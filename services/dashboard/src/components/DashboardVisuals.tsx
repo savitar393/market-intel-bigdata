@@ -121,9 +121,9 @@ export function ModelPerformanceChart({
           <YAxis tickFormatter={(value) => `${(Number(value) * 100).toFixed(0)}%`} />
           <Tooltip formatter={(value) => percent(Number(value))} />
           <Legend />
-          <Bar dataKey="accuracy" name="Accuracy" />
-          <Bar dataKey="f1" name="F1-score" />
-          <Bar dataKey="roc_auc" name="ROC-AUC" />
+          <Bar dataKey="accuracy" name="Accuracy" fill="#38bdf8" />
+          <Bar dataKey="f1" name="F1-score" fill="#5eead4" />
+          <Bar dataKey="roc_auc" name="ROC-AUC" fill="#a78bfa" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -192,12 +192,14 @@ export function PredictionTimelineChart({
             yAxisId="price"
             dataKey="upPrice"
             name="Predicted UP"
+            fill="#5eead4"
             isAnimationActive={false}
           />
           <Scatter
             yAxisId="price"
             dataKey="downPrice"
             name="Predicted DOWN"
+            fill="#fda4af"
             isAnimationActive={false}
           />
         </ScatterChart>
