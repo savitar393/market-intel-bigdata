@@ -5,14 +5,26 @@ import {
   Legend,
   Line,
   LineChart,
-  ReferenceLine,
   ResponsiveContainer,
-  Scatter,
-  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+
+const CHART_TOOLTIP_STYLE = {
+  backgroundColor: "#0f172a",
+  border: "1px solid #334155",
+  borderRadius: "10px",
+  color: "#e2e8f0",
+};
+
+const CHART_TOOLTIP_LABEL_STYLE = {
+  color: "#e2e8f0",
+};
+
+const CHART_TOOLTIP_ITEM_STYLE = {
+  color: "#e2e8f0",
+};
 
 export type ModelMetricItem = {
   model_name: string;
@@ -96,6 +108,27 @@ function timeLabel(value: string) {
   });
 }
 
+function PredictionDot(props: any) {
+  const { cx, cy, payload } = props;
+
+  if (cx === undefined || cy === undefined) {
+    return null;
+  }
+
+  const isUp = payload?.predicted_direction === 1;
+
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill={isUp ? "#5eead4" : "#fda4af"}
+      stroke="#0f172a"
+      strokeWidth={1.5}
+    />
+  );
+}
+
 export function ModelPerformanceChart({
   items,
 }: {
@@ -140,8 +173,7 @@ export function PredictionTimelineChart({
     .map((item) => ({
       ...item,
       time: timeLabel(item.event_time),
-      upPrice: item.predicted_direction === 1 ? item.market_price : null,
-      downPrice: item.predicted_direction === 0 ? item.market_price : null,
+      market_price: item.market_price ?? null,
       confidencePercent:
         item.confidence !== null && item.confidence !== undefined
           ? item.confidence * 100
@@ -155,15 +187,15 @@ export function PredictionTimelineChart({
   return (
     <div className="chart">
       <ResponsiveContainer width="100%" height={360}>
-        <ScatterChart data={data}>
+        <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" minTickGap={24} />
           <YAxis
-            yAxisId="price"
             dataKey="market_price"
             domain={["auto", "auto"]}
             tickFormatter={(value) => number(Number(value))}
           />
+
           <Tooltip
             formatter={(value, name) => {
               if (name === "Confidence") {
@@ -178,32 +210,34 @@ export function PredictionTimelineChart({
                 ? new Date(item.event_time).toLocaleString()
                 : "-";
             }}
+            contentStyle={CHART_TOOLTIP_STYLE}
+            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+            itemStyle={CHART_TOOLTIP_ITEM_STYLE}
           />
+
           <Line
-            yAxisId="price"
             type="monotone"
             dataKey="market_price"
             name="Market price"
+            stroke="#38bdf8"
             strokeWidth={2}
-            dot={false}
+            dot={<PredictionDot />}
+            activeDot={{ r: 7 }}
             isAnimationActive={false}
           />
-          <Scatter
-            yAxisId="price"
-            dataKey="upPrice"
-            name="Predicted UP"
-            fill="#5eead4"
-            isAnimationActive={false}
-          />
-          <Scatter
-            yAxisId="price"
-            dataKey="downPrice"
-            name="Predicted DOWN"
-            fill="#fda4af"
-            isAnimationActive={false}
-          />
-        </ScatterChart>
+        </LineChart>
       </ResponsiveContainer>
+
+      <div className="chart-legend">
+        <span className="legend-item">
+          <span className="legend-dot legend-up" />
+          Predicted UP
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot legend-down" />
+          Predicted DOWN
+        </span>
+      </div>
     </div>
   );
 }
@@ -233,6 +267,9 @@ export function DailyTrendChart({
           <YAxis domain={["auto", "auto"]} tickFormatter={(value) => number(Number(value))} />
           <Tooltip
             formatter={(value, name) => [number(Number(value)), name]}
+            contentStyle={CHART_TOOLTIP_STYLE}
+            labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+            itemStyle={CHART_TOOLTIP_ITEM_STYLE}
             labelFormatter={(_, payload) => {
               const item = payload?.[0]?.payload as DailyTrendItem | undefined;
               return item?.event_date ?? "-";
@@ -242,7 +279,6 @@ export function DailyTrendChart({
           <Line type="monotone" dataKey="close" name="Daily close" dot={false} strokeWidth={2} />
           <Line type="monotone" dataKey="ma_100" name="MA100" dot={false} strokeWidth={2} />
           <Line type="monotone" dataKey="ma_200" name="MA200" dot={false} strokeWidth={2} />
-          <ReferenceLine y={0} />
         </LineChart>
       </ResponsiveContainer>
     </div>
