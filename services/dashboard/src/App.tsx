@@ -9,6 +9,14 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "./App.css";
+import {
+  DailyTrendChart,
+  ModelPerformanceChart,
+  PredictionTimelineChart,
+  type DailyTrendItem,
+  type ModelMetricItem,
+  type PredictionTimelineItem,
+} from "./components/DashboardVisuals";
 
 type MarketItem = {
   symbol: string;
@@ -120,6 +128,9 @@ function App() {
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [lastError, setLastError] = useState<string | null>(null);
   const [systemSummary, setSystemSummary] = useState<SystemSummary | null>(null);
+  const [modelMetrics, setModelMetrics] = useState<ModelMetricItem[]>([]);
+  const [predictionTimeline, setPredictionTimeline] = useState<PredictionTimelineItem[]>([]);
+  const [dailyTrend, setDailyTrend] = useState<DailyTrendItem[]>([]);
   const requestSeqRef = useRef(0);
 
   useEffect(() => {
@@ -330,6 +341,93 @@ function App() {
     };
   }, [symbol]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadModelMetrics() {
+      try {
+        const response = await fetch(`${API_BASE}/api/v1/evaluation/classification-summary`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!cancelled) {
+          setModelMetrics(data.items ?? []);
+        }
+      } catch (error) {
+        console.error("Model metrics fetch failed:", error);
+
+        if (!cancelled) {
+          setModelMetrics([]);
+        }
+      }
+    }
+
+    loadModelMetrics();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | null = null;
+
+    const encodedSymbol = encodeURIComponent(symbol);
+
+    async function loadVisualData() {
+      try {
+        const [timelineResponse, dailyResponse] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/timeline/predictions/${encodedSymbol}?limit=100`),
+          fetch(`${API_BASE}/api/v1/daily-context/${encodedSymbol}?limit=252`),
+        ]);
+
+        if (!timelineResponse.ok) {
+          throw new Error(`Timeline HTTP ${timelineResponse.status}`);
+        }
+
+        if (!dailyResponse.ok) {
+          throw new Error(`Daily context HTTP ${dailyResponse.status}`);
+        }
+
+        const timelineData = await timelineResponse.json();
+        const dailyData = await dailyResponse.json();
+
+        if (!cancelled) {
+          setPredictionTimeline(timelineData.items ?? []);
+          setDailyTrend(dailyData.items ?? []);
+        }
+      } catch (error) {
+        console.error("Visual data fetch failed:", error);
+
+        if (!cancelled) {
+          setPredictionTimeline([]);
+          setDailyTrend([]);
+        }
+      }
+
+      if (!cancelled) {
+        timer = window.setTimeout(loadVisualData, 10000);
+      }
+    }
+
+    setPredictionTimeline([]);
+    setDailyTrend([]);
+    loadVisualData();
+
+    return () => {
+      cancelled = true;
+
+      if (timer !== null) {
+        window.clearTimeout(timer);
+      }
+    };
+  }, [symbol]);
+
   const marketChartData = useMemo(() => {
     return [...(snapshot?.market ?? [])]
       .reverse()
@@ -484,6 +582,32 @@ function App() {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </section>
+
+      <section className="panel">
+        <h2>Price + Prediction Timeline</h2>
+        <p className="muted">
+          Market price is shown together with online UP/DOWN model predictions for {symbol}.
+        </p>
+        <PredictionTimelineChart items={predictionTimeline} />
+      </section>
+
+      {!MARKET_ONLY_SYMBOLS.has(symbol) && (
+        <section className="panel">
+          <h2>Daily Trend Context</h2>
+          <p className="muted">
+            Long-term daily close, MA100, and MA200 context derived from Yahoo Finance daily backfill.
+          </p>
+          <DailyTrendChart items={dailyTrend} />
+        </section>
+      )}
+
+      <section className="panel">
+        <h2>Model Performance Comparison</h2>
+        <p className="muted">
+          Classification evaluation across baseline models used to justify final model selection.
+        </p>
+        <ModelPerformanceChart items={modelMetrics} />
       </section>
 
       <section className="panel">

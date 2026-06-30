@@ -50,6 +50,9 @@ services:
       CASSANDRA_HOSTS: cassandra
       CASSANDRA_PORT: 9042
       CASSANDRA_KEYSPACE: market_intel
+    volumes:
+      - ../../data:/app/data:ro
+      - ../../config:/app/config:ro
     depends_on:
       - cassandra
     restart: unless-stopped
